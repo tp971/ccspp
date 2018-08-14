@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     CLIParser cli;
     CLIOpt cli_depth = cli.addOpt('d', "depth", 1);
     CLIOpt cli_ignore_unguarded = cli.addOpt('i', "ignore-unguarded");
-    CLIOpt cli_help = cli.addOpt('h', "help", 1);
+    CLIOpt cli_help = cli.addOpt('h', "help");
     CLIOpt cli_omit_names = cli.addOpt("omit-names");
 
     enum Command { NONE, RANDOM, TTR, GRAPH, ECHO };
