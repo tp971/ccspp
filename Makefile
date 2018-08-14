@@ -9,7 +9,9 @@ LDflags=-Llibccs++/lib -lccs++ -lcli++
 Input=main.cpp cmd_graph.cpp cmd_random.cpp
 ObjDir=obj
 BinDir=bin
-Output=ccs
+Output=ccs++
+
+PREFIX=/usr/local
 
 Objects=$(addprefix $(ObjDir)/,$(addsuffix .o, $(Input)))
 
@@ -38,5 +40,17 @@ obj/%.cpp.o: %.cpp
 
 .IGNORE: clean
 clean:
+	make -C libccs++ clean
 	rm $(ObjDir)/*
 	rm $(BinDir)/$(Output)
+
+.PHONY: install
+install: $(BinDir)/$(Output)
+	make -C libccs++ install
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp $< $(DESTDIR)$(PREFIX)/bin/$(Output)
+
+.PHONY: uninstall
+uninstall:
+	make -C libccs++ uninstall
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(Output)

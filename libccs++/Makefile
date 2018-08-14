@@ -9,7 +9,11 @@ LDflags=
 Input=ccs.cpp ccsparser.cpp
 ObjDir=obj
 BinDir=lib
-Output=libccs++.a
+
+Name=ccs++
+Output=lib$(Name).a
+
+PREFIX=/usr/local
 
 Objects=$(addprefix $(ObjDir)/,$(addsuffix .o, $(Input)))
 
@@ -39,3 +43,15 @@ obj/%.cpp.o: %.cpp
 clean:
 	rm $(ObjDir)/*
 	rm $(BinDir)/$(Output)
+
+.PHONY: install
+install: $(BinDir)/$(Output)
+	mkdir -p $(DESTDIR)$(PREFIX)/lib
+	cp $< $(DESTDIR)$(PREFIX)/lib/$(Output)
+	mkdir -p $(DESTDIR)$(PREFIX)/include/$(Name)
+	cp *.h $(DESTDIR)$(PREFIX)/include/$(Name)
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/lib/$(Output)
+	rm -rf $(DESTDIR)$(PREFIX)/include/$(Name)
