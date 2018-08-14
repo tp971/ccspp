@@ -1,0 +1,4 @@
+Lock := lock?.unlock?.Lock
+Inc := lock!.getX?.i.setX!.unlock!.0
+
+(Inc | Inc | Lock) \ {lock,unlock}

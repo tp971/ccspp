@@ -1,0 +1,42 @@
+CC=gcc
+CXX=g++
+LD=g++
+
+Cflags=-c -MD
+CXXflags=-c -MD --std=c++14 -O3
+LDflags=-Llibccs++/lib -lccs++ -lcli++
+
+Input=main.cpp cmd_graph.cpp cmd_random.cpp
+ObjDir=obj
+BinDir=bin
+Output=ccs
+
+Objects=$(addprefix $(ObjDir)/,$(addsuffix .o, $(Input)))
+
+all: makedirs makelibs $(BinDir)/$(Output)
+	cd $(BinDir); ./$(Output)
+
+.PHONY: makedirs
+makedirs: $(ObjDir)/ $(BinDir)/
+
+%/:
+	mkdir -p $@
+
+makelibs:
+	make -C libccs++
+
+$(BinDir)/$(Output): $(Objects) libccs++/lib/libccs++.a
+	$(LD) -o $(BinDir)/$(Output) $(Objects) $(LDflags)
+
+obj/%.c.o: %.c
+	$(CC) $(Cflags) -o $@ $<
+
+obj/%.cpp.o: %.cpp
+	$(CXX) $(CXXflags) -o $@ $<
+
+-include $(ObjDir)/*.d
+
+.IGNORE: clean
+clean:
+	rm $(ObjDir)/*
+	rm $(BinDir)/$(Output)

@@ -1,0 +1,167 @@
+#include "libccs++/ccs.h"
+#include "libccs++/ccsparser.h"
+
+#include "cmd_graph.h"
+#include "cmd_random.h"
+
+#include <iostream>
+#include <fstream>
+#include <memory>
+#include <cli++/cli.h>
+
+using namespace std;
+using namespace clipp;
+using namespace ccspp;
+
+int opt_max_depth = -1;
+bool opt_ignore_unguarded = false;
+bool opt_omit_names = false;
+
+void printUsage(char* argv0)
+{
+    cout << "Usage: " << argv0 << " [options] <command> [input-file]" << endl;
+}
+
+void printHelp(char* argv0)
+{
+    printUsage(argv0);
+    cout <<
+        "If no input file or \"-\" is given, reads from standard input." << endl <<
+        endl <<
+        "commands:" << endl <<
+        "    random" << endl <<
+        "        Traverse a random path through the LTS" << endl <<
+        "    ttr" << endl <<
+        "        Search for terminating traces" << endl <<
+        "    graph" << endl <<
+        "        Output a graph of the LTS in DOT format" << endl <<
+        "    echo" << endl <<
+        "        Outputs the CCS program (for debugging)" << endl <<
+        endl <<
+        "options (general):" << endl <<
+        "    -d, --depth" << endl <<
+        "        Limits the depth of LTS exploration" << endl <<
+        "    -i, --ignore-unguarded" << endl <<
+        "        Ignores unguarded recursion in LTS exploration" << endl <<
+        "    -h, --help" << endl <<
+        "        Print this help message" << endl <<
+        endl <<
+        "options (graph):" << endl <<
+        "    --omit-names" << endl <<
+        "        Does not print the CCS process expressions into the nodes" << endl;
+}
+
+int main(int argc, char** argv)
+{
+    CLIParser cli;
+    CLIOpt cli_depth = cli.addOpt('d', "depth", 1);
+    CLIOpt cli_ignore_unguarded = cli.addOpt('i', "ignore-unguarded");
+    CLIOpt cli_help = cli.addOpt('h', "help", 1);
+    CLIOpt cli_omit_names = cli.addOpt("omit-names");
+
+    enum Command { NONE, RANDOM, TTR, GRAPH, ECHO };
+
+    Command cmd = NONE;
+    std::string inputfile;
+
+    try
+    {
+        for(CLIArg arg : cli.parse(argc, argv))
+            if(arg.opt == cli_help)
+            {
+                printHelp(argv[0]);
+                return 0;
+            }
+            else if(arg.opt == cli_depth)
+            {
+                try
+                {
+                    opt_max_depth = stoi(arg.params[0]);
+                }
+                catch(exception& ex)
+                {
+                    cout << "invalid number: " << arg.params[0] << endl;
+                    return 1;
+                }
+            }
+            else if(arg.opt == cli_ignore_unguarded)
+                opt_ignore_unguarded = true;
+            else if(arg.opt == cli_omit_names)
+                opt_omit_names = true;
+            else if(cmd == NONE)
+            {
+                if(arg.str == "random")
+                    cmd = RANDOM;
+                else if(arg.str == "ttr")
+                    cmd = TTR;
+                else if(arg.str == "graph")
+                    cmd = GRAPH;
+                else if(arg.str == "echo")
+                    cmd = ECHO;
+                else
+                    cerr << "error: unknown command: " << arg.str << endl;
+            }
+            else if(inputfile == "")
+                inputfile = arg.str;
+            else
+            {
+                cerr << "error: more than one input file given" << endl;
+                return 1;
+            }
+    }
+    catch(CLIException& ex)
+    {
+        cerr << "error: " << ex.what() << endl;
+        return 1;
+    }
+
+    if(cmd == NONE)
+    {
+        printUsage(argv[0]);
+        return 0;
+    }
+
+    unique_ptr<CCSProgram> program;
+    try
+    {
+        if(inputfile == "" || inputfile == "-")
+        {
+            CCSParser parser(cin, "stdin");
+            program = parser.parse();
+        }
+        else
+        {
+            ifstream input(inputfile);
+            if(!input)
+            {
+                cerr << "error: could not open input file" << endl;
+                return 1;
+            }
+            CCSParser parser(input, inputfile);
+            program = parser.parse();
+        }
+    }
+    catch(CCSParserException& ex)
+    {
+        cout << ex.what() << endl;
+        return 1;
+    }
+
+    switch(cmd)
+    {
+    case RANDOM:
+        return cmd_random(*program);
+    case TTR:
+        //TODO
+        return 0;
+    case GRAPH:
+        return cmd_graph(*program);
+    case ECHO:
+        cout << *program;
+        return 0;
+    default:
+        cerr << "error: this should not happen!" << endl;
+        return 1;
+    }
+    return 0;
+}
