@@ -3,8 +3,8 @@ CXX=g++
 LD=g++
 
 Cflags=-c -MD
-CXXflags=-c -MD --std=c++14 -O3
-LDflags=-Llibccs++/lib -lccs++ -lcli++
+CXXflags=-c -MD -Idep --std=c++14 -O3
+LDflags=-Ldep/cli++/lib -Llibccs++/lib -lcli++ -lccs++
 
 Input=main.cpp cmd_graph.cpp cmd_random.cpp
 ObjDir=obj
@@ -25,6 +25,7 @@ makedirs: $(ObjDir)/ $(BinDir)/
 	mkdir -p $@
 
 makelibs:
+	if [ -f dep/cli++/Makefile ]; then make -C dep/cli++; fi
 	make -C libccs++
 
 $(BinDir)/$(Output): $(Objects) libccs++/lib/libccs++.a

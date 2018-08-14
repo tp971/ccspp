@@ -1,28 +1,44 @@
-# ccs++
+ccs++
+=====
+
 ccs++ is an implementation of CCS (Calculus of communicating systems) as a C++ library
 including a cli for exploring the semantics of CCS processes.
 
 CCS is a process algebra for modeling concurrent processes.
 It has a well defined operational semantics and is even turing complete.
 
-# Build & Install
+Build & Install
+---------------
+
 Dependencies:
-* a c++17 compliant c++ compiler
-* [cli++](https://github.com/tp971/clipp)
+* make
+* a C++14 compliant C++ compiler
+* [cli++](https://github.com/tp971/clipp) (included as a submodule)
+* Doxygen (optional, for building documentation)
+
+To clone the project with submodules, use
+
+    $ git clone --recurse-submodules git@github.com:tp971/ccspp.git
 
 The project can be built with
 
-    make
+    $ make
 
 and installed with
 
-    make install
+    $ make install
 
 into `/usr/local`. To specify an own installation prefix, use
 
-    make install PREFIX=path/to/prefix
+    $ make install PREFIX=path/to/prefix
 
-# CCS
+The documentation can be built with
+
+    $ doxygen
+
+CCS
+---
+
 A brief introduction to CCS:
 CCS is a language aimed to formalize and study the behaviour of concurrent systems.
 The semantics of CCS is a labelled transition system:
@@ -59,7 +75,8 @@ The process "x.0 | y.0" can perform two transitions:
 
 So the parallel operator "P | Q" either makes a transition of the left or right process while keeping the other process (in contrast to "P + Q"). This represents the parallel execution of two processes.
 
-# Syntax
+Syntax
+------
 
 A CCS program consists of named (and possibly parameterized) processes and one process:
 
@@ -106,9 +123,10 @@ A CCS process has the following syntax (given in ebnf):
 The precedence is given in descending order in the grammar above (i.e. prefix has the highest precedence, followed by restriction, then the choice operator etc).
 Operators in the same row have the same precedence and all binary operators are left associative.
 
-# Semantics
+Semantics
+---------
 
-## Actions
+### Actions
 There are five kinds of actions:
 1. Internal action "i".
 2. Termination acion "e".
@@ -121,15 +139,15 @@ Let act be an action. We define the complementary action ~act of act as follows:
 1. ~act? := act!
 2. ~act! := act?
 
-## Null process
+### Null process
 The null process "0" has no transitions.
 
-## Terminating process
+### Terminating process
 The terminating process "1" has one transition:
 
     1   --( e )->   0
 
-## Restriction operator
+### Restriction operator
 Let "P \ H" be a process, where H is the set of actions, e.g. "P \ {a,b,c,...}", and H should not contain "i" or "e".
 
 If H contains a normal action act, it behaves as H would also contain act! and act?.
@@ -146,7 +164,7 @@ So a restriction can prevent a process from doing certain transitions, but it ca
 
 The restriction of complement "P \ {*,a,b,c,...}" inverts the condition (*): act has to be "i", "e" or act must be in H.
 
-## Choice operator
+### Choice operator
 Let "P + Q" be a process. If P has a transition
 
     P   --( act )->   P'
@@ -166,7 +184,7 @@ then
 So the choice operator a transition from either P or Q, while discarding the other process.
 This operator represents a non-deterministical choice between P or Q.
 
-## Parallel operator
+### Parallel operator
 Let "P | Q" be a process. If P has a transition
 
     P   --( act )->   P'
@@ -215,7 +233,7 @@ then
 
 So "P | Q" only terminates (i.e. performs the action "e"), if both processes are terminated (i.e. P and Q can perform the action "e").
 
-## Sequential operator
+### Sequential operator
 Let "P; Q" be a process. If P has a transition
 
     P   --( e )->   Q
@@ -227,7 +245,7 @@ then
 So the sequential operator waits for the termination of P and continues with Q.
 Note that you cannot write something like "P.Q", because the prefix operator has an action on the left hand side and no process.
 
-## Execution and Traces
+### Execution and Traces
 
 Let
 
@@ -238,7 +256,8 @@ The sequence of actions alone is called the trace of this execution. The trace o
 
     a1, a2, a3, ..., an
 
-## Examples
+Examples
+--------
 
 ### Synchronization
 In this example we want to model two processes: one process gets some input, caluclates something and gives it to the second process, which calculates something, and outputs it.
@@ -482,7 +501,7 @@ One execution of this process would now be:
 
     (0 | 0 | Lock) \ {lock,unlock}
 
-## Value passing
+## CCS value passing
 
 _Note: This is not yet implemented._
 
