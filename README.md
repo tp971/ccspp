@@ -18,7 +18,7 @@ Dependencies:
 
 To clone the project with submodules, use
 
-    $ git clone --recurse-submodules git@github.com:tp971/ccspp.git
+    $ git clone --recurse-submodules https://github.com/tp971/ccspp.git
 
 The project can be built with
 
