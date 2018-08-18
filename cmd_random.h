@@ -1,7 +1,7 @@
 #ifndef CMD_RANDOM_H_INCLUDED
 #define CMD_RANDOM_H_INCLUDED
 
-#include "libccs++/ccs.h"
+#include "ccs++/ccs.h"
 
 int cmd_random(ccspp::CCSProgram& program);
 

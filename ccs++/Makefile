@@ -1,6 +1,5 @@
-CC=gcc
-CXX=g++
-LD=ar rvc
+#CC=gcc
+#CXX=g++
 
 Cflags=-c -MD
 CXXflags=-c -MD --std=c++14 -O3
@@ -29,7 +28,7 @@ makelibs:
 #	make -C ...
 
 $(BinDir)/$(Output): $(Objects)
-	$(LD) -o $(BinDir)/$(Output) $(Objects) $(LDflags)
+	ar rvc -o $(BinDir)/$(Output) $(Objects) $(LDflags)
 
 obj/%.c.o: %.c
 	$(CC) $(Cflags) -o $@ $<

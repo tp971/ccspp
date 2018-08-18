@@ -1,8 +1,9 @@
-#include "libccs++/ccs.h"
-#include "libccs++/ccsparser.h"
+#include "ccs++/ccs.h"
+#include "ccs++/ccsparser.h"
 
 #include "cmd_graph.h"
 #include "cmd_random.h"
+#include "cmd_ttr.h"
 
 #include <iostream>
 #include <fstream>
@@ -29,12 +30,16 @@ void printHelp(char* argv0)
         "If no input file or \"-\" is given, reads from standard input." << endl <<
         endl <<
         "commands:" << endl <<
-        "    random" << endl <<
-        "        Traverse a random path through the LTS" << endl <<
-        "    ttr" << endl <<
-        "        Search for terminating traces" << endl <<
         "    graph" << endl <<
         "        Output a graph of the LTS in DOT format" << endl <<
+        "    random" << endl <<
+        "        Traverse a random path through the LTS" << endl <<
+        "    actions" << endl <<
+        "        Search for all actions" << endl <<
+        "    dead" << endl <<
+        "        Search for deadlocks (states with no outgoing transitions)" << endl <<
+        "    ttr" << endl <<
+        "        Search for terminating traces" << endl <<
         "    echo" << endl <<
         "        Outputs the CCS program (for debugging)" << endl <<
         endl <<
@@ -59,7 +64,7 @@ int main(int argc, char** argv)
     CLIOpt cli_help = cli.addOpt('h', "help");
     CLIOpt cli_omit_names = cli.addOpt("omit-names");
 
-    enum Command { NONE, RANDOM, TTR, GRAPH, ECHO };
+    enum Command { NONE, GRAPH, RANDOM, ACTIONS, DEAD, TTR, ECHO };
 
     Command cmd = NONE;
     std::string inputfile;
@@ -90,12 +95,16 @@ int main(int argc, char** argv)
                 opt_omit_names = true;
             else if(cmd == NONE)
             {
-                if(arg.str == "random")
+                if(arg.str == "graph")
+                    cmd = GRAPH;
+                else if(arg.str == "random")
                     cmd = RANDOM;
+                else if(arg.str == "actions")
+                    cmd = ACTIONS;
+                else if(arg.str == "dead")
+                    cmd = DEAD;
                 else if(arg.str == "ttr")
                     cmd = TTR;
-                else if(arg.str == "graph")
-                    cmd = GRAPH;
                 else if(arg.str == "echo")
                     cmd = ECHO;
                 else
@@ -149,13 +158,18 @@ int main(int argc, char** argv)
 
     switch(cmd)
     {
-    case RANDOM:
-        return cmd_random(*program);
-    case TTR:
-        //TODO
-        return 0;
     case GRAPH:
         return cmd_graph(*program);
+    case RANDOM:
+        return cmd_random(*program);
+    case ACTIONS:
+        //TODO
+        return 1;
+    case DEAD:
+        //TODO
+        return 1;
+    case TTR:
+        return cmd_ttr(*program);
     case ECHO:
         cout << *program;
         return 0;
