@@ -84,6 +84,9 @@ bool CCSAction::operator== (const CCSAction& act) const
 
 
 
+CCSTransition::CCSTransition()
+{}
+
 CCSTransition::CCSTransition(CCSAction act, shared_ptr<CCSProcess> from, shared_ptr<CCSProcess> to)
     :act(act), from(from), to(to)
 {}

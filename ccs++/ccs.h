@@ -36,7 +36,7 @@ namespace ccspp
 
     public:
         /** @brief Constructs a CCSAction */
-        CCSAction(Type type, std::string name = "");
+        CCSAction(Type type = NONE, std::string name = "");
 
         /** @brief Returns the type of the CCSAction. */
         Type getType() const;
@@ -81,6 +81,9 @@ namespace ccspp
         std::shared_ptr<CCSProcess> to;
 
     public:
+        /** @brief Empty constructor. */
+        CCSTransition();
+
         /** @brief Constructs a CCSTransition.
             Constructs a CCSTransition "from --( act )-> to".
 
@@ -188,6 +191,15 @@ namespace ccspp
             SEQUENTIAL      /**< sequential operator */
         };
 
+        friend class CCSNull;
+        friend class CCSTerm;
+        friend class CCSProcessName;
+        friend class CCSPrefix;
+        friend class CCSChoice;
+        friend class CCSParallel;
+        friend class CCSRestrict;
+        friend class CCSSequential;
+
     private:
         Type type;
 
@@ -197,14 +209,12 @@ namespace ccspp
         */
         virtual int compare(CCSProcess* p) const = 0;
 
-    public:
-        /** @brief Prints the CCProcess to an ouptu stream. */
-        virtual void print(std::ostream& out) const = 0;
-
-        /** @brief Internal method to calculates all possible transition of that process.
-            \note This method should not be used outside the class. This method is only public due to some restriction of C++ to the protected access modifier.
-        */
+        /** @brief Internal method to calculates all possible transition of that process. */
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen) = 0;
+
+    public:
+        /** @brief Prints the CCProcess to an output stream. */
+        virtual void print(std::ostream& out) const = 0;
 
         /** @brief Visitor acceptor method. */
         virtual void accept(CCSVisitor<void>* v) = 0;
@@ -216,7 +226,6 @@ namespace ccspp
         Type getType() const;
 
         /** @brief Calculates all possible transition of that process.
-            Hello?
             @param program The CCSProgram of the process.
             @returns A set of CCSTransitions.
             @throws CCSRecursionException if there is an unguarded exception
@@ -250,11 +259,11 @@ namespace ccspp
     {
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSNull();
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
@@ -262,11 +271,11 @@ namespace ccspp
     {
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSTerm();
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
@@ -277,12 +286,12 @@ namespace ccspp
 
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSProcessName(std::string name);
         std::string getName() const;
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
@@ -294,6 +303,7 @@ namespace ccspp
 
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSPrefix(CCSAction act, std::shared_ptr<CCSProcess> p);
@@ -301,7 +311,6 @@ namespace ccspp
         std::shared_ptr<CCSProcess> getProcess() const;
 
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
@@ -313,6 +322,7 @@ namespace ccspp
 
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSChoice(std::shared_ptr<CCSProcess> left, std::shared_ptr<CCSProcess> right);
@@ -320,7 +330,6 @@ namespace ccspp
         std::shared_ptr<CCSProcess> getRight() const;
 
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
@@ -332,6 +341,7 @@ namespace ccspp
 
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSParallel(std::shared_ptr<CCSProcess> left, std::shared_ptr<CCSProcess> right);
@@ -339,7 +349,6 @@ namespace ccspp
         std::shared_ptr<CCSProcess> getRight() const;
 
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
@@ -352,6 +361,7 @@ namespace ccspp
 
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSRestrict(std::shared_ptr<CCSProcess> p, std::set<CCSAction> r, bool complement = false);
@@ -360,7 +370,6 @@ namespace ccspp
         bool isComplement() const;
 
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
@@ -372,6 +381,7 @@ namespace ccspp
 
     protected:
         virtual int compare(CCSProcess* p) const;
+        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
 
     public:
         CCSSequential(std::shared_ptr<CCSProcess> left, std::shared_ptr<CCSProcess> right);
@@ -379,7 +389,6 @@ namespace ccspp
         std::shared_ptr<CCSProcess> getRight() const;
 
         virtual void print(std::ostream& out) const;
-        virtual std::set<CCSTransition> getTransitions(CCSProgram& program, std::set<std::string> seen);
         virtual void accept(CCSVisitor<void>* v);
     };
 
