@@ -1,12 +1,12 @@
 #include "cmd_ttr.h"
 #include "main.h"
 #include <stack>
-#include <sstream>
+#include <vector>
 
 using namespace std;
 using namespace ccspp;
 
-bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<string>& seen,
+bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<vector<CCSAction>>& seen,
                set<shared_ptr<CCSProcess>, PtrCmp>& visited, deque<CCSTransition>& trace)
 {
     if(depth <= 0)
@@ -17,22 +17,32 @@ bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<str
     set<CCSTransition>&& trans = p->getTransitions(program);
     if(trans.empty())
     {
-        stringstream ss;
-        ss << "[";
-        bool first = true;
+        vector<CCSAction> next;
         for(CCSTransition t : trace)
+            next.push_back(t.getAction());
+        if(!seen.count(next))
         {
-            if(!first)
-                ss << ", ";
-            first = false;
-            ss << t.getAction();
-        }
-        ss << "]";
-        string res = ss.str();
-        if(!seen.count(res))
-        {
-            cout << res << endl;
-            seen.insert(res);
+            seen.insert(next);
+            if(opt_full_paths)
+            {
+                cout << *trace.front().getFrom();
+                for(CCSTransition t : trace)
+                    cout << "   --( " << t.getAction() << " )->   " << *t.getTo();
+                cout << endl;
+            }
+            else
+            {
+                cout << "[";
+                bool first = true;
+                for(CCSTransition t : trace)
+                {
+                    if(!first)
+                        cout << ", ";
+                    first = false;
+                    cout << t.getAction();
+                }
+                cout << "] ~> " << *p << endl;
+            }
         }
         return true;
     }
@@ -49,7 +59,7 @@ bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<str
     return res;
 }
 
-bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<string>& seen)
+bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<vector<CCSAction>>& seen)
 {
     set<shared_ptr<CCSProcess>, PtrCmp> visited;
     deque<CCSTransition> trace;
@@ -59,7 +69,7 @@ bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<str
 int cmd_ttr(CCSProgram& program)
 {
     int depth = 0;
-    set<string> seen;
+    set<vector<CCSAction>> seen;
     while(depth <= opt_max_depth || opt_max_depth < 1)
         if(dfs_limit(program, program.getProcess(), depth++, seen))
             break;

@@ -5,7 +5,7 @@ Cflags=-c -MD
 CXXflags=-c -MD -Idep --std=c++14 -O3
 LDflags=-Ldep/cli++/lib -Lccs++/lib -lcli++ -lccs++
 
-Input=main.cpp cmd_graph.cpp cmd_random.cpp cmd_ttr.cpp
+Input=main.cpp cmd_graph.cpp cmd_random.cpp cmd_actions.cpp cmd_dead.cpp cmd_ttr.cpp
 ObjDir=obj
 BinDir=bin
 Output=ccs++

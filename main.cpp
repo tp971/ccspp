@@ -3,6 +3,8 @@
 
 #include "cmd_graph.h"
 #include "cmd_random.h"
+#include "cmd_actions.h"
+#include "cmd_dead.h"
 #include "cmd_ttr.h"
 
 #include <iostream>
@@ -16,6 +18,7 @@ using namespace ccspp;
 
 int opt_max_depth = -1;
 bool opt_ignore_unguarded = false;
+bool opt_full_paths = false;
 bool opt_omit_names = false;
 
 void printUsage(char* argv0)
@@ -48,6 +51,8 @@ void printHelp(char* argv0)
         "        Limits the depth of LTS exploration" << endl <<
         "    -i, --ignore-unguarded" << endl <<
         "        Ignores unguarded recursion in LTS exploration" << endl <<
+        "    --full-paths" << endl <<
+        "        Show full paths instead traces (including all states)" << endl <<
         "    -h, --help" << endl <<
         "        Print this help message" << endl <<
         endl <<
@@ -61,6 +66,7 @@ int main(int argc, char** argv)
     CLIParser cli;
     CLIOpt cli_depth = cli.addOpt('d', "depth", 1);
     CLIOpt cli_ignore_unguarded = cli.addOpt('i', "ignore-unguarded");
+    CLIOpt cli_full_paths = cli.addOpt("full-paths");
     CLIOpt cli_help = cli.addOpt('h', "help");
     CLIOpt cli_omit_names = cli.addOpt("omit-names");
 
@@ -91,6 +97,8 @@ int main(int argc, char** argv)
             }
             else if(arg.opt == cli_ignore_unguarded)
                 opt_ignore_unguarded = true;
+            else if(arg.opt == cli_full_paths)
+                opt_full_paths = true;
             else if(arg.opt == cli_omit_names)
                 opt_omit_names = true;
             else if(cmd == NONE)
@@ -163,11 +171,9 @@ int main(int argc, char** argv)
     case RANDOM:
         return cmd_random(*program);
     case ACTIONS:
-        //TODO
-        return 1;
+        return cmd_actions(*program);
     case DEAD:
-        //TODO
-        return 1;
+        return cmd_dead(*program);
     case TTR:
         return cmd_ttr(*program);
     case ECHO:
