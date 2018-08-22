@@ -74,6 +74,7 @@ int cmd_dead(CCSProgram& program)
                             cout << ", ";
                         first = false;
                         cout << path.top().getAction();
+                        p = path.top().getTo();
                         path.pop();
                     }
                     cout << "] ~> " << *p << endl;

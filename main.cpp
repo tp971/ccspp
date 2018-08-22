@@ -116,7 +116,10 @@ int main(int argc, char** argv)
                 else if(arg.str == "echo")
                     cmd = ECHO;
                 else
+                {
                     cerr << "error: unknown command: " << arg.str << endl;
+                    return 1;
+                }
             }
             else if(inputfile == "")
                 inputfile = arg.str;
