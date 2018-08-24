@@ -58,11 +58,6 @@ int CCSConstExp::compare(CCSExp* e) const
         return 1;
 }
 
-void CCSConstExp::print(ostream& out) const
-{
-    out << val;
-}
-
 shared_ptr<CCSExp> CCSConstExp::subst(string id, int val, bool fold)
 {
     return shared_from_this();
@@ -72,6 +67,14 @@ int CCSConstExp::eval()
 {
     return val;
 }
+
+void CCSConstExp::print(ostream& out) const
+{
+    out << val;
+}
+
+void CCSConstExp::accept(CCSExpVisitor<void>* v)
+{ v->visit(this); }
 
 
 
@@ -93,11 +96,6 @@ int CCSIdExp::compare(CCSExp* e) const
         return 1;
 }
 
-void CCSIdExp::print(ostream& out) const
-{
-    out << id;
-}
-
 shared_ptr<CCSExp> CCSIdExp::subst(string id, int val, bool fold)
 {
     if(this->id == id)
@@ -115,6 +113,14 @@ int CCSIdExp::eval()
     else
         throw CCSUnboundException(shared_from_this(), id, "unbound identifier: " + id);
 }
+
+void CCSIdExp::print(ostream& out) const
+{
+    out << id;
+}
+
+void CCSIdExp::accept(CCSExpVisitor<void>* v)
+{ v->visit(this); }
 
 
 
@@ -136,19 +142,6 @@ int CCSUnaryExp::compare(CCSExp* e) const
     else if(op > _e->op)
         return 1;
     return exp->compare(*_e->exp);
-}
-
-void CCSUnaryExp::print(ostream& out) const
-{
-    out << "(";
-    switch(op)
-    {
-    case PLUS: out << "+"; break;
-    case MINUS: out << "-"; break;
-    case NOT: out << "!"; break;
-    }
-    exp->print(out);
-    out << ")";
 }
 
 shared_ptr<CCSExp> CCSUnaryExp::subst(string id, int val, bool fold)
@@ -188,6 +181,22 @@ int CCSUnaryExp::eval()
     return eval(val);
 }
 
+void CCSUnaryExp::print(ostream& out) const
+{
+    out << "(";
+    switch(op)
+    {
+    case PLUS: out << "+"; break;
+    case MINUS: out << "-"; break;
+    case NOT: out << "!"; break;
+    }
+    exp->print(out);
+    out << ")";
+}
+
+void CCSUnaryExp::accept(CCSExpVisitor<void>* v)
+{ v->visit(this); }
+
 
 
 CCSBinaryExp::CCSBinaryExp(Op op, shared_ptr<CCSExp> lhs, shared_ptr<CCSExp> rhs)
@@ -216,29 +225,6 @@ int CCSBinaryExp::compare(CCSExp* e) const
     return rhs->compare(*_e->rhs);
 }
 
-void CCSBinaryExp::print(ostream& out) const
-{
-    out << "(";
-    lhs->print(out);
-    switch(op)
-    {
-    case PLUS: out << " + "; break;
-    case MINUS: out << " - "; break;
-    case MUL: out << " * "; break;
-    case DIV: out << " / "; break;
-    case MOD: out << " % "; break;
-    case OR: out << " | "; break;
-    case AND: out << " && "; break;
-    case EQ: out << " == "; break;
-    case NEQ: out << " != "; break;
-    case LT: out << " < "; break;
-    case LEQ: out << " <= "; break;
-    case GT: out << " > "; break;
-    case GEQ: out << " >= "; break;
-    }
-    rhs->print(out);
-    out << ")";
-}
 
 shared_ptr<CCSExp> CCSBinaryExp::subst(string id, int val, bool fold)
 {
@@ -295,3 +281,30 @@ int CCSBinaryExp::eval()
     }
     return eval(lval, rval);
 }
+
+void CCSBinaryExp::print(ostream& out) const
+{
+    out << "(";
+    lhs->print(out);
+    switch(op)
+    {
+    case PLUS: out << " + "; break;
+    case MINUS: out << " - "; break;
+    case MUL: out << " * "; break;
+    case DIV: out << " / "; break;
+    case MOD: out << " % "; break;
+    case OR: out << " | "; break;
+    case AND: out << " && "; break;
+    case EQ: out << " == "; break;
+    case NEQ: out << " != "; break;
+    case LT: out << " < "; break;
+    case LEQ: out << " <= "; break;
+    case GT: out << " > "; break;
+    case GEQ: out << " >= "; break;
+    }
+    rhs->print(out);
+    out << ")";
+}
+
+void CCSBinaryExp::accept(CCSExpVisitor<void>* v)
+{ v->visit(this); }

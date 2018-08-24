@@ -116,9 +116,13 @@ A CCS process has the following syntax (given in ebnf):
     int = "0" | digitnonzero { digit } | "-" digitnonzero { digit }
     exp = identifier
         | int
-        | "-" exp
+        | "+" exp | "-" exp | "!" exp
         | exp "*" exp | exp "/" exp | exp "%" exp
         | exp "+" exp | exp "-" exp
+        | exp "<" exp | exp "<=" exp | exp ">" exp | exp ">=" exp
+        | exp "==" exp | exp "!=" exp
+        | exp "&&" exp
+        | exp "||" exp
 
 The precedence is given in descending order in the grammar above (i.e. prefix has the highest precedence, followed by restriction, then the choice operator etc).
 Operators in the same row have the same precedence and all binary operators are left associative.

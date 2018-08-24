@@ -16,7 +16,27 @@ namespace ccspp
     template<typename T, typename V = void>
     class CCSVisitor;
 
-    /** @brief Represents a CCS action. */
+    template<typename T, typename V = void>
+    class CCSExpVisitor;
+
+    /** @brief Represents a CCS action.
+
+        A CCS action can be:
+        1. `i` (the internal action)
+        2. `e` (the termination action)
+        3. `name(param)`
+        4. `name(param)!`
+        5. `name(param)!(exp)`
+        6. `name(param)?identifier`
+        7. `name(param)?(exp)`
+
+        where param and exp are CCS expressions.
+        In all cases, (param) can be omitted.
+
+        The action `i` has type TAU, the action `e` has type DELTA.
+        Actions with a `!` have type SEND and actions with `?` have type RECV.
+        All other actions have type NONE.
+    */
     class CCSAction
     {
     public:
@@ -40,10 +60,10 @@ namespace ccspp
         CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> param, std::string input, std::shared_ptr<CCSExp> exp);
 
     public:
-        /** @brief Constructs a CCSAction i, e or none. */
+        /** @brief Constructs an empty CCSAction, i or e. */
         CCSAction(Type type = NONE);
 
-        /** @brief Constructs a CCSAction name(param) */
+        /** @brief Constructs a CCSAction name(param), name(param)! or name(param)? */
         CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> param = nullptr);
 
         /** @brief Constructs a CCSAction name(param)?input */

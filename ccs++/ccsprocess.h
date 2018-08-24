@@ -9,6 +9,7 @@
 
 namespace ccspp
 {
+    /** @brief Represents a CCS process. */
     class CCSProcess
     {
     public:
@@ -52,15 +53,6 @@ namespace ccspp
         /** @brief Constructor. */
         CCSProcess(Type type);
 
-        /** @brief Substitutes an identifier by a value. */
-        virtual std::shared_ptr<CCSProcess> subst(std::string id, int val, bool fold = true) = 0;
-
-        /** @brief Prints the CCSProcess to an output stream. */
-        virtual void print(std::ostream& out) const = 0;
-
-        /** @brief Visitor acceptor method. */
-        virtual void accept(CCSVisitor<void>* v) = 0;
-
         /** @brief Returns the type of the process. */
         Type getType() const;
 
@@ -72,6 +64,15 @@ namespace ccspp
                 leading to a recursion in transition inference.
         */
         std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold = true);
+
+        /** @brief Substitutes an identifier by a value. */
+        virtual std::shared_ptr<CCSProcess> subst(std::string id, int val, bool fold = true) = 0;
+
+        /** @brief Prints the CCSProcess to an output stream. */
+        virtual void print(std::ostream& out) const = 0;
+
+        /** @brief Visitor acceptor method. */
+        virtual void accept(CCSVisitor<void>* v) = 0;
 
         /** @brief Returns a string representing this CCSProcess. */
         operator std::string() const;
@@ -88,6 +89,7 @@ namespace ccspp
     /** @brief Prints a CCSProcess to an output stream */
     std::ostream& operator<< (std::ostream& out, const CCSProcess& p);
 
+    /** @brief Represents the null process. */
     class CCSNull : public CCSProcess, public std::enable_shared_from_this<CCSNull>
     {
     protected:
@@ -101,6 +103,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents the terminated process. */
     class CCSTerm : public CCSProcess, public std::enable_shared_from_this<CCSTerm>
     {
     protected:
@@ -114,6 +117,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents a process instantiation. */
     class CCSProcessName : public CCSProcess, public std::enable_shared_from_this<CCSProcessName>
     {
     private:
@@ -134,6 +138,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents a prefix process. */
     class CCSPrefix : public CCSProcess, public std::enable_shared_from_this<CCSPrefix>
     {
     private:
@@ -154,6 +159,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents the choice operator. */
     class CCSChoice : public CCSProcess, public std::enable_shared_from_this<CCSChoice>
     {
     private:
@@ -174,6 +180,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents the parallel operator. */
     class CCSParallel : public CCSProcess, public std::enable_shared_from_this<CCSParallel>
     {
     private:
@@ -194,6 +201,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents the restriction operator. */
     class CCSRestrict : public CCSProcess, public std::enable_shared_from_this<CCSRestrict>
     {
     private:
@@ -216,6 +224,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents the sequential operator. */
     class CCSSequential : public CCSProcess, public std::enable_shared_from_this<CCSSequential>
     {
     private:
@@ -236,6 +245,7 @@ namespace ccspp
         virtual void accept(CCSVisitor<void>* v);
     };
 
+    /** @brief Represents the when operator. */
     class CCSWhen : public CCSProcess, public std::enable_shared_from_this<CCSWhen>
     {
     private:

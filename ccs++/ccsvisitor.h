@@ -186,6 +186,123 @@ namespace ccspp
         T vvisit(std::shared_ptr<CCSProcess> p, V v)
         { this->v = &v; p->accept(this); return ret; }
     };
+
+    template<>
+    class CCSExpVisitor<void,void>
+    {
+    public:
+        virtual void visit(CCSConstExp* e) = 0;
+        virtual void visit(CCSIdExp* e) = 0;
+        virtual void visit(CCSUnaryExp* e) = 0;
+        virtual void visit(CCSBinaryExp* e) = 0;
+
+        void visit(CCSExp& e);
+        void visit(CCSExp* e);
+        void visit(std::shared_ptr<CCSExp> e);
+    };
+
+    template<typename V>
+    class CCSExpVisitor<void,V> : public CCSExpVisitor<void>
+    {
+    private:
+        V* v;
+
+    public:
+        virtual void visit(CCSConstExp* e)
+        { _visit(e, *v); }
+
+        virtual void visit(CCSIdExp* e)
+        { _visit(e, *v); }
+
+        virtual void visit(CCSUnaryExp* e)
+        { _visit(e, *v); }
+
+        virtual void visit(CCSBinaryExp* e)
+        { _visit(e, *v); }
+
+        virtual void _visit(CCSConstExp* e, V v) = 0;
+        virtual void _visit(CCSIdExp* e, V v) = 0;
+        virtual void _visit(CCSUnaryExp* e, V v) = 0;
+        virtual void _visit(CCSBinaryExp* e, V v) = 0;
+
+        void vvisit(CCSExp& e, V v)
+        { this->v = &v; e.accept(this); }
+
+        void vvisit(CCSExp* e, V v)
+        { this->v = &v; e->accept(this); }
+
+        void vvisit(std::shared_ptr<CCSExp> e, V v)
+        { this->v = &v; e->accept(this); }
+    };
+
+    template<typename T>
+    class CCSExpVisitor<T,void> : public CCSExpVisitor<void>
+    {
+    private:
+        T ret;
+
+    public:
+        virtual void visit(CCSConstExp* e)
+        { ret = _visit(e); }
+
+        virtual void visit(CCSIdExp* e)
+        { ret = _visit(e); }
+
+        virtual void visit(CCSUnaryExp* e)
+        { ret = _visit(e); }
+
+        virtual void visit(CCSBinaryExp* e)
+        { ret = _visit(e); }
+
+        virtual T _visit(CCSConstExp* e) = 0;
+        virtual T _visit(CCSIdExp* e) = 0;
+        virtual T _visit(CCSUnaryExp* e) = 0;
+        virtual T _visit(CCSBinaryExp* e) = 0;
+
+        T vvisit(CCSExp& e)
+        { e.accept(this); return ret; }
+
+        T vvisit(CCSExp* e)
+        { e->accept(this); return ret; }
+
+        T vvisit(std::shared_ptr<CCSExp> e)
+        { e->accept(this); return ret; }
+    };
+
+    template<typename T, typename V>
+    class CCSExpVisitor : public CCSExpVisitor<void>
+    {
+    private:
+        T ret;
+        V* v;
+
+    public:
+        virtual void visit(CCSConstExp* e)
+        { ret = _visit(e, *v); }
+
+        virtual void visit(CCSIdExp* e)
+        { ret = _visit(e, *v); }
+
+        virtual void visit(CCSUnaryExp* e)
+        { ret = _visit(e, *v); }
+
+        virtual void visit(CCSBinaryExp* e)
+        { ret = _visit(e, *v); }
+
+        virtual T _visit(CCSConstExp* e, V v) = 0;
+        virtual T _visit(CCSIdExp* e, V v) = 0;
+        virtual T _visit(CCSUnaryExp* e, V v) = 0;
+        virtual T _visit(CCSBinaryExp* e, V v) = 0;
+
+        T vvisit(CCSExp& e, V v)
+        { this->v = &v; e.accept(this); return ret; }
+
+        T vvisit(CCSExp* e, V v)
+        { this->v = &v; e->accept(this); return ret; }
+
+        T vvisit(std::shared_ptr<CCSExp> e, V v)
+        { this->v = &v; e->accept(this); return ret; }
+    };
 }
 
 #endif //CCSPP_CCSVISIOR_H_INCLUDED

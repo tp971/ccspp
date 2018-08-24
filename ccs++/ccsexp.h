@@ -9,9 +9,11 @@
 
 namespace ccspp
 {
+    /** @brief Represents a CCS expression used in CCSvp. */
     class CCSExp
     {
     public:
+        /** @brief The type of the CCS expression */
         enum Type
         {
             CONST = 0,
@@ -41,17 +43,20 @@ namespace ccspp
         /** @brief Returns the type of the expression. */
         Type getType() const;
 
+        /** @brief Substitute identifier by a value. */
+        virtual std::shared_ptr<CCSExp> subst(std::string id, int val, bool fold = true) = 0;
+
+        /** @brief Evaluates the expression.
+            @throws CCSUnboundException if there is an identifier in the expression.
+            @throws CCSUndefinedException if the expression is undefined (e.g. division by zero)
+        */
+        virtual int eval() = 0;
+
         /** @brief Prints the CCSExp to an output stream. */
         virtual void print(std::ostream& out) const = 0;
 
-        ///** @brief Visitor acceptor method. */
-        //virtual void accept(CCSVisitor<void>* v) = 0;
-
-        ///** @brief Substitute identifier by a value. */
-        virtual std::shared_ptr<CCSExp> subst(std::string id, int val, bool fold = true) = 0;
-
-        ///** @brief Evaluate expression. */
-        virtual int eval() = 0;
+        /** @brief Visitor acceptor method. */
+        virtual void accept(CCSExpVisitor<void>* v) = 0;
 
         /** @brief Returns a string representing this CCSExp. */
         operator std::string() const;
@@ -68,6 +73,7 @@ namespace ccspp
     /** @brief Prints a CCSExp to an output stream */
     std::ostream& operator<< (std::ostream& out, const CCSExp& p);
 
+    /** @brief Represents a constant. */
     class CCSConstExp : public CCSExp, public std::enable_shared_from_this<CCSConstExp>
     {
     private:
@@ -79,12 +85,13 @@ namespace ccspp
     public:
         CCSConstExp(int val);
         int getVal() const;
-        virtual void print(std::ostream& out) const;
-        //virtual void accept(CCSVisitor<void>* v);
         virtual std::shared_ptr<CCSExp> subst(std::string id, int val, bool fold = true);
         virtual int eval();
+        virtual void print(std::ostream& out) const;
+        virtual void accept(CCSExpVisitor<void>* v);
     };
 
+    /** @brief Represents an identifier. */
     class CCSIdExp : public CCSExp, public std::enable_shared_from_this<CCSIdExp>
     {
     private:
@@ -96,12 +103,13 @@ namespace ccspp
     public:
         CCSIdExp(std::string id);
         std::string getId() const;
-        virtual void print(std::ostream& out) const;
-        //virtual void accept(CCSVisitor<void>* v);
         virtual std::shared_ptr<CCSExp> subst(std::string id, int val, bool fold = true);
         virtual int eval();
+        virtual void print(std::ostream& out) const;
+        virtual void accept(CCSExpVisitor<void>* v);
     };
 
+    /** @brief Represents a unary expression. */
     class CCSUnaryExp : public CCSExp, public std::enable_shared_from_this<CCSUnaryExp>
     {
     public:
@@ -124,12 +132,13 @@ namespace ccspp
         CCSUnaryExp(Op op, std::shared_ptr<CCSExp> exp);
         Op getOp() const;
         std::shared_ptr<CCSExp> getExp() const;
-        virtual void print(std::ostream& out) const;
-        //virtual void accept(CCSVisitor<void>* v);
         virtual std::shared_ptr<CCSExp> subst(std::string id, int val, bool fold = true);
         virtual int eval();
+        virtual void print(std::ostream& out) const;
+        virtual void accept(CCSExpVisitor<void>* v);
     };
 
+    /** @brief Represents a binary expression. */
     class CCSBinaryExp : public CCSExp, public std::enable_shared_from_this<CCSBinaryExp>
     {
     public:
@@ -164,10 +173,10 @@ namespace ccspp
         Op getOp() const;
         std::shared_ptr<CCSExp> getLhs() const;
         std::shared_ptr<CCSExp> getRhs() const;
-        virtual void print(std::ostream& out) const;
-        //virtual void accept(CCSVisitor<void>* v);
         virtual std::shared_ptr<CCSExp> subst(std::string id, int val, bool fold = true);
         virtual int eval();
+        virtual void print(std::ostream& out) const;
+        virtual void accept(CCSExpVisitor<void>* v);
     };
 }
 
