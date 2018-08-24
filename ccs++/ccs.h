@@ -16,8 +16,6 @@ namespace ccspp
     template<typename T, typename V = void>
     class CCSVisitor;
 
-    //TODO: parameterized action (act(id)!...)
-
     /** @brief Represents a CCS action. */
     class CCSAction
     {
