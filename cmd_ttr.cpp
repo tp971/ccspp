@@ -14,7 +14,26 @@ bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<vec
     if(visited.count(p))
         return true;
 
-    set<CCSTransition>&& trans = p->getTransitions(program);
+    set<CCSTransition> trans;
+
+    try
+    {
+        trans = p->getTransitions(program, !opt_no_fold);
+    }
+    catch(CCSException& ex)
+    {
+        if(opt_ignore_error)
+        {
+            cerr << "warning: " << ex.what() << endl;
+            return true;
+        }
+        else
+        {
+            cerr << "error: " << ex.what() << endl;
+            throw;
+        }
+    }
+
     if(trans.empty())
     {
         vector<CCSAction> next;
@@ -68,10 +87,17 @@ bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<vec
 
 int cmd_ttr(CCSProgram& program)
 {
-    int depth = 0;
-    set<vector<CCSAction>> seen;
-    while(depth <= opt_max_depth || opt_max_depth < 1)
-        if(dfs_limit(program, program.getProcess(), depth++, seen))
-            break;
+    try
+    {
+        int depth = 0;
+        set<vector<CCSAction>> seen;
+        while(depth <= opt_max_depth || opt_max_depth < 1)
+            if(dfs_limit(program, program.getProcess(), depth++, seen))
+                break;
+    }
+    catch(CCSException& ex)
+    {
+        return 1;
+    }
     return 0;
 }

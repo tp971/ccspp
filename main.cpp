@@ -17,7 +17,8 @@ using namespace clipp;
 using namespace ccspp;
 
 int opt_max_depth = -1;
-bool opt_ignore_unguarded = false;
+bool opt_ignore_error = false;
+bool opt_no_fold = false;
 bool opt_full_paths = false;
 bool opt_omit_names = false;
 
@@ -49,8 +50,10 @@ void printHelp(char* argv0)
         "options (general):" << endl <<
         "    -d, --depth" << endl <<
         "        Limits the depth of LTS exploration" << endl <<
-        "    -i, --ignore-unguarded" << endl <<
-        "        Ignores unguarded recursion in LTS exploration" << endl <<
+        "    -i, --ignore-error" << endl <<
+        "        Ignores errors during LTS exploration" << endl <<
+        "    --no-fold" << endl <<
+        "        Do not fold constant expressions to constants" << endl <<
         "    --full-paths" << endl <<
         "        Show full paths instead traces (including all states)" << endl <<
         "    -h, --help" << endl <<
@@ -65,7 +68,8 @@ int main(int argc, char** argv)
 {
     CLIParser cli;
     CLIOpt cli_depth = cli.addOpt('d', "depth", 1);
-    CLIOpt cli_ignore_unguarded = cli.addOpt('i', "ignore-unguarded");
+    CLIOpt cli_ignore_error = cli.addOpt('i', "ignore-error");
+    CLIOpt cli_no_fold = cli.addOpt("no-fold");
     CLIOpt cli_full_paths = cli.addOpt("full-paths");
     CLIOpt cli_help = cli.addOpt('h', "help");
     CLIOpt cli_omit_names = cli.addOpt("omit-names");
@@ -95,12 +99,19 @@ int main(int argc, char** argv)
                     return 1;
                 }
             }
-            else if(arg.opt == cli_ignore_unguarded)
-                opt_ignore_unguarded = true;
+            else if(arg.opt == cli_ignore_error)
+                opt_ignore_error = true;
+            else if(arg.opt == cli_no_fold)
+                opt_no_fold = true;
             else if(arg.opt == cli_full_paths)
                 opt_full_paths = true;
             else if(arg.opt == cli_omit_names)
                 opt_omit_names = true;
+            else if(arg.opt != CLINonOpt)
+            {
+                cerr << "error: command line option not implemented" << endl;
+                return 1;
+            }
             else if(cmd == NONE)
             {
                 if(arg.str == "graph")

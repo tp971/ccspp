@@ -5,7 +5,7 @@ Cflags=-c -MD
 CXXflags=-c -MD --std=c++14 -O3
 LDflags=
 
-Input=ccs.cpp ccsprocess.cpp ccsvisitor.cpp ccsparser.cpp
+Input=ccs.cpp ccsexp.cpp ccsprocess.cpp ccsvisitor.cpp ccsparser.cpp
 ObjDir=obj
 BinDir=lib
 

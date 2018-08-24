@@ -27,7 +27,13 @@ namespace ccspp
     class CCSToken
     {
     public:
-        enum Type { TNONE = 0, TEOF, TID, TNUM, TCOLONEQ, TDOT, TSEND, TRECV, TPLUS, TPIPE, TSEMICOLON, TBACKSLASH, TLBRACE, TRBRACE, TCOMMA, TSTAR, TLPAR, TRPAR };
+        enum Type
+        {
+            TNONE = 0, TEOF, TID, TNUM, TLPAR, TRPAR, TLSQBR, TRSQBR,
+            TPLUS, TMINUS, TSTAR, TSLASH, TPERCENT,
+            TANDAND, TPIPEPIPE, TEQEQ, TNEQ, TLT, TLEQ, TGT, TGEQ,
+            TCOLONEQ, TDOT, TBANG, TQUESTIONMARK, TPIPE, TSEMICOLON, TBACKSLASH, TLBRACE, TRBRACE, TCOMMA, TWHEN
+        };
 
         Type type;
         std::string str;
@@ -63,6 +69,7 @@ namespace ccspp
     {
     private:
         CCSLexer lex;
+
         int prec_i;
         bool prec_left;
         std::map<CCSToken::Type, int> prec_l;
@@ -73,8 +80,21 @@ namespace ccspp
         int getLPrec(CCSToken::Type type);
         int getRPrec(CCSToken::Type type);
 
-        std::shared_ptr<CCSProcess> parseProcess(int prec = 0);
-        std::shared_ptr<CCSProcess> parsePrimary();
+        int pprec_i;
+        bool pprec_left;
+        std::map<CCSToken::Type, int> pprec_l;
+        std::map<CCSToken::Type, int> pprec_r;
+
+        void addPPrec(int assoc);
+        void addPOp(CCSToken::Type type);
+        int getLPPrec(CCSToken::Type type);
+        int getRPPrec(CCSToken::Type type);
+
+        std::shared_ptr<CCSExp> parseExp(int prec = 0);
+        std::shared_ptr<CCSExp> parsePrimaryExp();
+
+        std::shared_ptr<CCSProcess> parseProcess(int prec = 0, std::shared_ptr<CCSProcess> res = nullptr);
+        std::shared_ptr<CCSProcess> parsePrimaryProcess();
         CCSAction parseAction();
 
     public:

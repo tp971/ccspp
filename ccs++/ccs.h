@@ -4,10 +4,12 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <vector>
 #include <iostream>
 
 namespace ccspp
 {
+    class CCSExp;
     class CCSProcess;
     class CCSProcessName;
 
@@ -31,23 +33,36 @@ namespace ccspp
     private:
         Type type;
         std::string name;
-        //std::string identifier;
+        std::string input;
+        std::shared_ptr<CCSExp> exp;
 
     public:
         /** @brief Constructs a CCSAction */
         CCSAction(Type type = NONE, std::string name = "");
 
-        /** @brief Constructs a CCSAction name?identifier */
-        //CCSAction(std::string name, std::string identifier);
+        /** @brief Constructs a CCSAction name?input */
+        CCSAction(Type type, std::string name, std::string input);
 
-        /** @brief Constructs a CCSAction name?identifier */
-        //CCSAction(std::string name, std::string identifier);
+        /** @brief Constructs a CCSAction name?exp or name!exp */
+        CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> exp);
 
         /** @brief Returns the type of the CCSAction. */
         Type getType() const;
 
         /** @brief Returns the name of the CCSAction. */
         std::string getName() const;
+
+        /** @brief Returns the input in act?input */
+        std::string getInput() const;
+
+        /** @brief Returns the expression in act?exp or act!exp */
+        std::shared_ptr<CCSExp> getExp() const;
+
+        /** @brief Returns the action without any expression or input. */
+        CCSAction getPlain() const;
+
+        /** @brief Returns the action without any expression or input and type. */
+        CCSAction getNone() const;
 
         /** @brief Prints the CCSAction to an output stream. */
         void print(std::ostream& out) const;
@@ -127,17 +142,21 @@ namespace ccspp
     {
     private:
         std::string name;
+        std::vector<std::string> params;
         std::shared_ptr<CCSProcess> process;
 
     public:
         /** @brief Empty constructor (mainly for STL containers). */
         CCSBinding();
 
-        /** @brief Constructs a CCSBinding from a name and a process. */
-        CCSBinding(std::string name, std::shared_ptr<CCSProcess> process);
+        /** @brief Constructs a CCSBinding name[params] := process */
+        CCSBinding(std::string name, std::vector<std::string> params, std::shared_ptr<CCSProcess> process);
 
         /** @brief Returns the name of the process. */
         std::string getName() const;
+
+        /** @brief Returns the parameters of the process. */
+        std::vector<std::string> getParams() const;
 
         /** @brief Returns the process. */
         std::shared_ptr<CCSProcess> getProcess() const;
@@ -158,13 +177,13 @@ namespace ccspp
 
     public:
         /** @brief Add a binding to a named process. */
-        void addBinding(std::string name, std::shared_ptr<CCSProcess> process);
+        void addBinding(std::string name, std::vector<std::string> params, std::shared_ptr<CCSProcess> process);
 
         /** @brief Set the main process. */
         void setProcess(std::shared_ptr<CCSProcess> process);
 
         /** @brief Get a named process. */
-        std::shared_ptr<CCSProcess> get(std::string name) const;
+        std::shared_ptr<CCSProcess> get(std::string name, std::vector<int> args, bool fold = true) const;
 
         /** @brief Returns all bindings. */
         std::map<std::string, CCSBinding> getBindings() const;
@@ -181,15 +200,21 @@ namespace ccspp
 
     class CCSException : public std::runtime_error
     {
+    public:
+        CCSException(std::string message);
+    };
+
+    class CCSProcessException : public CCSException
+    {
     private:
         std::shared_ptr<CCSProcess> process;
 
     public:
-        CCSException(std::shared_ptr<CCSProcess> process, std::string message);
+        CCSProcessException(std::shared_ptr<CCSProcess> process, std::string message);
         std::shared_ptr<CCSProcess> getProcess() const;
     };
 
-    class CCSRecursionException : public CCSException
+    class CCSRecursionException : public CCSProcessException
     {
     private:
         std::string name;
@@ -198,9 +223,36 @@ namespace ccspp
         CCSRecursionException(std::shared_ptr<CCSProcessName> process, std::string message);
         std::string getName() const;
     };
+
+    class CCSExpException : public CCSException
+    {
+    private:
+        std::shared_ptr<CCSExp> exp;
+
+    public:
+        CCSExpException(std::shared_ptr<CCSExp> exp, std::string message);
+        std::shared_ptr<CCSExp> getExp() const;
+        void setExp(std::shared_ptr<CCSExp> exp);
+    };
+
+    class CCSUnboundException : public CCSExpException
+    {
+    private:
+        std::string id;
+
+    public:
+        CCSUnboundException(std::shared_ptr<CCSExp> exp, std::string id, std::string message);
+        std::string getId() const;
+    };
+
+    class CCSUndefinedException : public CCSExpException
+    {
+    public:
+        CCSUndefinedException(std::shared_ptr<CCSExp> exp, std::string message);
+    };
 }
 
+#include "ccsexp.h"
 #include "ccsprocess.h"
-//#include "ccsexp.h"
 
 #endif //CCSPP_CCS_H_INCLUDED

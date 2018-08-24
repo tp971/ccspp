@@ -68,32 +68,91 @@ void CCSLexer::read()
 
     switch(ch)
     {
-    case ':':
+    case '(': tokens.emplace_back(CCSToken::TLPAR, "(", name, line, col); getch(); break;
+    case ')': tokens.emplace_back(CCSToken::TRPAR, ")", name, line, col); getch(); break;
+    case '[': tokens.emplace_back(CCSToken::TLSQBR, "[", name, line, col); getch(); break;
+    case ']': tokens.emplace_back(CCSToken::TRSQBR, "]", name, line, col); getch(); break;
+    case '+': tokens.emplace_back(CCSToken::TPLUS, "+", name, line, col); getch(); break;
+    case '-': tokens.emplace_back(CCSToken::TMINUS, "-", name, line, col); getch(); break;
+    case '*': tokens.emplace_back(CCSToken::TSTAR, "*", name, line, col); getch(); break;
+    case '/': tokens.emplace_back(CCSToken::TSLASH, "/", name, line, col); getch(); break;
+    case '%': tokens.emplace_back(CCSToken::TPERCENT, "%", name, line, col); getch(); break;
+    case '&':
         getch();
         if(input.eof())
             throw CCSParserException(name, line, col, "unexpected end of file");
-
-        if(ch == '=')
-            tokens.emplace_back(CCSToken::TCOLONEQ, ":=", name, line, col);
+        if(ch == '&')
+            { tokens.emplace_back(CCSToken::TANDAND, "&&", name, line, col); getch(); }
         else if(ch == '\r' || ch == '\n')
             throw CCSParserException(name, line, col, "unexpected end of line");
         else
             throw CCSParserException(name, line, col, string("unexpected character: `") + ch + "`");
+        break;
+    case '|':
         getch();
+        if(input.eof())
+            throw CCSParserException(name, line, col, "unexpected end of file");
+        if(ch == '|')
+            { tokens.emplace_back(CCSToken::TPIPEPIPE, "||", name, line, col); getch(); }
+        else
+            tokens.emplace_back(CCSToken::TPIPE, "|", name, line, col);
+        break;
+    case '=':
+        getch();
+        if(input.eof())
+            throw CCSParserException(name, line, col, "unexpected end of file");
+        if(ch == '=')
+            { tokens.emplace_back(CCSToken::TEQEQ, "==", name, line, col); getch(); }
+        else if(ch == '\r' || ch == '\n')
+            throw CCSParserException(name, line, col, "unexpected end of line");
+        else
+            throw CCSParserException(name, line, col, string("unexpected character: `") + ch + "`");
+        break;
+    case '!':
+        getch();
+        if(input.eof())
+            throw CCSParserException(name, line, col, "unexpected end of file");
+        if(ch == '=')
+            { tokens.emplace_back(CCSToken::TNEQ, "!=", name, line, col); getch(); }
+        else
+            tokens.emplace_back(CCSToken::TBANG, "!", name, line, col);
+        break;
+    case '<':
+        getch();
+        if(input.eof())
+            throw CCSParserException(name, line, col, "unexpected end of file");
+        if(ch == '=')
+            { tokens.emplace_back(CCSToken::TLEQ, "<=", name, line, col); getch(); }
+        else
+            tokens.emplace_back(CCSToken::TLT, "<", name, line, col);
+        break;
+    case '>':
+        getch();
+        if(input.eof())
+            throw CCSParserException(name, line, col, "unexpected end of file");
+        if(ch == '=')
+            { tokens.emplace_back(CCSToken::TGEQ, ">=", name, line, col); getch(); }
+        else
+            tokens.emplace_back(CCSToken::TGT, ">", name, line, col);
+        break;
+    case ':':
+        getch();
+        if(input.eof())
+            throw CCSParserException(name, line, col, "unexpected end of file");
+        if(ch == '=')
+            { tokens.emplace_back(CCSToken::TCOLONEQ, ":=", name, line, col); getch(); }
+        else if(ch == '\r' || ch == '\n')
+            throw CCSParserException(name, line, col, "unexpected end of line");
+        else
+            throw CCSParserException(name, line, col, string("unexpected character: `") + ch + "`");
         break;
     case '.': tokens.emplace_back(CCSToken::TDOT, ".", name, line, col); getch(); break;
-    case '!': tokens.emplace_back(CCSToken::TSEND, "!", name, line, col); getch(); break;
-    case '?': tokens.emplace_back(CCSToken::TRECV, "?", name, line, col); getch(); break;
-    case '+': tokens.emplace_back(CCSToken::TPLUS, "+", name, line, col); getch(); break;
-    case '|': tokens.emplace_back(CCSToken::TPIPE, "|", name, line, col); getch(); break;
+    case '?': tokens.emplace_back(CCSToken::TQUESTIONMARK, "?", name, line, col); getch(); break;
     case ';': tokens.emplace_back(CCSToken::TSEMICOLON, ";", name, line, col); getch(); break;
     case '\\': tokens.emplace_back(CCSToken::TBACKSLASH, "\\", name, line, col); getch(); break;
     case '{': tokens.emplace_back(CCSToken::TLBRACE, "{", name, line, col); getch(); break;
     case '}': tokens.emplace_back(CCSToken::TRBRACE, "}", name, line, col); getch(); break;
     case ',': tokens.emplace_back(CCSToken::TCOMMA, ",", name, line, col); getch(); break;
-    case '*': tokens.emplace_back(CCSToken::TSTAR, "*", name, line, col); getch(); break;
-    case '(': tokens.emplace_back(CCSToken::TLPAR, "(", name, line, col); getch(); break;
-    case ')': tokens.emplace_back(CCSToken::TRPAR, ")", name, line, col); getch(); break;
     default:
         if(isalpha(ch) || ch == '_')
         {
@@ -105,7 +164,11 @@ void CCSLexer::read()
                 str += ch;
                 getch();
             }
-            tokens.emplace_back(CCSToken::TID, str, name, l, c);
+
+            if(str == "when")
+                tokens.emplace_back(CCSToken::TWHEN, str, name, l, c);
+            else
+                tokens.emplace_back(CCSToken::TID, str, name, l, c);
         }
         else if(isdigit(ch))
         {
@@ -148,18 +211,50 @@ CCSParser::CCSParser(istream& input, string name)
     :lex(input, name, 2)
 {
     prec_i = 0;
-    
+
     addPrec(1);
-    addOp(CCSToken::TSEMICOLON);
-    
+    addOp(CCSToken::TPIPEPIPE);
+
     addPrec(1);
-    addOp(CCSToken::TPIPE);
-    
+    addOp(CCSToken::TANDAND);
+
+    addPrec(1);
+    addOp(CCSToken::TEQEQ);
+    addOp(CCSToken::TNEQ);
+
+    addPrec(1);
+    addOp(CCSToken::TLT);
+    addOp(CCSToken::TLEQ);
+    addOp(CCSToken::TGT);
+    addOp(CCSToken::TGEQ);
+
     addPrec(1);
     addOp(CCSToken::TPLUS);
-    
+    addOp(CCSToken::TMINUS);
+
+    addPrec(1);
+    addOp(CCSToken::TSTAR);
+    addOp(CCSToken::TSLASH);
+    addOp(CCSToken::TPERCENT);
+
     //unary
     addPrec(1);
+
+
+
+    pprec_i = 0;
+
+    addPPrec(1);
+    addPOp(CCSToken::TSEMICOLON);
+
+    addPPrec(1);
+    addPOp(CCSToken::TPIPE);
+
+    addPPrec(1);
+    addPOp(CCSToken::TPLUS);
+
+    //unary
+    addPPrec(1);
 }
 
 void CCSParser::addPrec(int assoc)
@@ -204,19 +299,85 @@ int CCSParser::getRPrec(CCSToken::Type type)
     return -1;
 }
 
+void CCSParser::addPPrec(int assoc)
+{
+    if(assoc < 0)
+    {
+        pprec_i += 2;
+        pprec_left = true;
+    }
+    else
+    {
+        pprec_i++;
+        pprec_left = false;
+    }
+}
+
+void CCSParser::addPOp(CCSToken::Type type)
+{
+    if(pprec_left)
+    {
+        pprec_l[type] = pprec_i - 1;
+        pprec_r[type] = pprec_i;
+    }
+    else
+    {
+        pprec_l[type] = pprec_i;
+        pprec_r[type] = pprec_i;
+    }
+}
+
+int CCSParser::getLPPrec(CCSToken::Type type)
+{
+    if(pprec_l.count(type))
+        return pprec_l[type];
+    return -1;
+}
+
+int CCSParser::getRPPrec(CCSToken::Type type)
+{
+    if(pprec_r.count(type))
+        return pprec_r[type];
+    return -1;
+}
+
 unique_ptr<CCSProgram> CCSParser::parse()
 {
     unique_ptr<CCSProgram> res = make_unique<CCSProgram>();
     
-    CCSToken t;
-    while((t = lex.peek(0)).type == CCSToken::TID && lex.peek(1).type == CCSToken::TCOLONEQ)
+    CCSToken t = lex.peek(0);
+    CCSToken t2 = lex.peek(1);
+    while(t.type == CCSToken::TID && (t2.type == CCSToken::TLSQBR || t2.type == CCSToken::TCOLONEQ))
     {
-        lex.next();
-        lex.next();
-        res->addBinding(t.str, parseProcess());
+        shared_ptr<CCSProcessName> p = static_pointer_cast<CCSProcessName>(parsePrimaryProcess());
+
+        bool allnames = true;
+        vector<string> params;
+        for(shared_ptr<CCSExp> next : p->getArgs())
+            if(next->getType() == CCSExp::ID)
+                params.push_back(((CCSIdExp&)*next).getId());
+            else
+            {
+                allnames = false;
+                break;
+            }
+
+        if(allnames && lex.peek(0).type == CCSToken::TCOLONEQ)
+        {
+            lex.next();
+            res->addBinding(t.str, params, parseProcess());
+        }
+        else
+        {
+            res->setProcess(parseProcess(0, p));
+            break;
+        }
+        t = lex.peek(0);
+        t2 = lex.peek(1);
     }
 
-    res->setProcess(parseProcess());
+    if(res->getProcess() == nullptr)
+        res->setProcess(parseProcess());
 
     t = lex.peek(0);
     if(t.type != CCSToken::TEOF)
@@ -225,9 +386,115 @@ unique_ptr<CCSProgram> CCSParser::parse()
     return res;
 }
 
-shared_ptr<CCSProcess> CCSParser::parseProcess(int prec)
+shared_ptr<CCSExp> CCSParser::parseExp(int prec)
 {
-    shared_ptr<CCSProcess> res = parsePrimary();
+    shared_ptr<CCSExp> res;
+
+    CCSToken t = lex.peek(0);
+    switch(t.type)
+    {
+    case CCSToken::TPLUS: res = make_shared<CCSUnaryExp>(CCSUnaryExp::PLUS, parseExp(prec_i)); break;
+    case CCSToken::TMINUS: res = make_shared<CCSUnaryExp>(CCSUnaryExp::MINUS, parseExp(prec_i)); break;
+    case CCSToken::TBANG: res = make_shared<CCSUnaryExp>(CCSUnaryExp::NOT, parseExp(prec_i)); break;
+    default: res = parsePrimaryExp(); break;
+    }
+
+    for(;;)
+    {
+        t = lex.peek(0);
+        if(getLPrec(t.type) < prec)
+            return res;
+        else
+        {
+            lex.next();
+            shared_ptr<CCSExp> rhs = parseExp(getRPrec(t.type));
+            switch(t.type)
+            {
+            case CCSToken::TPLUS: res = make_shared<CCSBinaryExp>(CCSBinaryExp::PLUS, res, rhs); break;
+            case CCSToken::TMINUS: res = make_shared<CCSBinaryExp>(CCSBinaryExp::MINUS, res, rhs); break;
+            case CCSToken::TSTAR: res = make_shared<CCSBinaryExp>(CCSBinaryExp::MUL, res, rhs); break;
+            case CCSToken::TSLASH: res = make_shared<CCSBinaryExp>(CCSBinaryExp::DIV, res, rhs); break;
+            case CCSToken::TPERCENT: res = make_shared<CCSBinaryExp>(CCSBinaryExp::MOD, res, rhs); break;
+            case CCSToken::TANDAND: res = make_shared<CCSBinaryExp>(CCSBinaryExp::AND, res, rhs); break;
+            case CCSToken::TPIPEPIPE: res = make_shared<CCSBinaryExp>(CCSBinaryExp::OR, res, rhs); break;
+            case CCSToken::TEQEQ: res = make_shared<CCSBinaryExp>(CCSBinaryExp::EQ, res, rhs); break;
+            case CCSToken::TNEQ: res = make_shared<CCSBinaryExp>(CCSBinaryExp::NEQ, res, rhs); break;
+            case CCSToken::TLT: res = make_shared<CCSBinaryExp>(CCSBinaryExp::LT, res, rhs); break;
+            case CCSToken::TLEQ: res = make_shared<CCSBinaryExp>(CCSBinaryExp::LEQ, res, rhs); break;
+            case CCSToken::TGT: res = make_shared<CCSBinaryExp>(CCSBinaryExp::GT, res, rhs); break;
+            case CCSToken::TGEQ: res = make_shared<CCSBinaryExp>(CCSBinaryExp::GEQ, res, rhs); break;
+            }
+        }
+    }
+}
+
+shared_ptr<CCSExp> CCSParser::parsePrimaryExp()
+{
+    CCSToken t = lex.peek(0);
+    if(t.type == CCSToken::TEOF)
+        throw CCSParserException(t, "unexpected end of file, expected `(`, identifier or constant");
+    switch(t.type)
+    {
+    case CCSToken::TID:
+    {
+        lex.next();
+        return make_shared<CCSIdExp>(t.str);
+    }
+    case CCSToken::TNUM:
+    {
+        try
+        {
+            lex.next();
+            return make_shared<CCSConstExp>(stoi(t.str));
+        }
+        catch(exception& ex)
+        {
+            throw CCSParserException(t, "invalid number `" + t.str + "`");
+        }
+    }
+    case CCSToken::TLPAR:
+    {
+        lex.next();
+        shared_ptr<CCSExp> res = parseExp();
+        t = lex.peek(0);
+        if(t.type == CCSToken::TEOF)
+            throw CCSParserException(t, "unexpected end of file, expected `)`");
+        if(t.type != CCSToken::TRPAR)
+            throw CCSParserException(t, "unexpected `" + t.str + "`, expected `)`");
+        lex.next();
+        return res;
+    }
+    default:
+        throw CCSParserException(t, "unexpected `" + t.str + "`, expected `(`, identifier or constant");
+    }
+}
+
+shared_ptr<CCSProcess> CCSParser::parseProcess(int prec, shared_ptr<CCSProcess> res)
+{
+    if(res == nullptr)
+    {
+        CCSToken t = lex.peek(0);
+        CCSToken t2 = lex.peek(1);
+        if(t.type == CCSToken::TWHEN)
+        {
+            lex.next();
+            shared_ptr<CCSExp> cond = parseExp();
+            res = make_shared<CCSWhen>(cond, parseProcess(pprec_i));
+        }
+        else if(t.type == CCSToken::TID && (t2.type == CCSToken::TDOT || t2.type == CCSToken::TQUESTIONMARK || t2.type == CCSToken::TBANG))
+        {
+            CCSAction act = parseAction();
+            t = lex.peek(0);
+            if(t.type == CCSToken::TEOF)
+                throw CCSParserException(t, "unexpected end of file, expected `.`");
+            if(t.type != CCSToken::TDOT)
+                throw CCSParserException(t, "unexpected `" + t.str + "`, expected `.`");
+            lex.next();
+            res = make_shared<CCSPrefix>(act, parseProcess(pprec_i));
+        }
+        else
+            res = parsePrimaryProcess();
+    }
 
     CCSToken t = lex.peek(0);
     while(t.type == CCSToken::TBACKSLASH)
@@ -271,13 +538,13 @@ shared_ptr<CCSProcess> CCSParser::parseProcess(int prec)
 
     for(;;)
     {
-        CCSToken t = lex.peek(0);
-        if(getLPrec(t.type) < prec)
+        t = lex.peek(0);
+        if(getLPPrec(t.type) < prec)
             return res;
         else
         {
             lex.next();
-            shared_ptr<CCSProcess> rhs = parseProcess(getRPrec(t.type));
+            shared_ptr<CCSProcess> rhs = parseProcess(getRPPrec(t.type));
             switch(t.type)
             {
             case CCSToken::TPLUS: res = make_shared<CCSChoice>(res, rhs); break;
@@ -288,61 +555,59 @@ shared_ptr<CCSProcess> CCSParser::parseProcess(int prec)
     }
 }
 
-shared_ptr<CCSProcess> CCSParser::parsePrimary()
+shared_ptr<CCSProcess> CCSParser::parsePrimaryProcess()
 {
-    stack<CCSAction> acts;
     CCSToken t = lex.peek(0);
-    CCSToken t2 = lex.peek(1);
-    while(t.type == CCSToken::TID && (t2.type == CCSToken::TDOT || t2.type == CCSToken::TRECV || t2.type == CCSToken::TSEND))
-    {
-        acts.push(parseAction());
-        t = lex.peek(0);
-        if(t.type == CCSToken::TEOF)
-            throw CCSParserException(t, "unexpected end of file, expected `.`");
-        if(t.type != CCSToken::TDOT)
-            throw CCSParserException(t, "unexpected `" + t.str + "`, expected `.`");
-        t = lex.next();
-        t2 = lex.peek(1);
-    }
-
-    shared_ptr<CCSProcess> res;
     if(t.type == CCSToken::TNUM && t.str == "0")
     {
-        res = make_shared<CCSNull>();
         lex.next();
+        return make_shared<CCSNull>();
     }
     else if(t.type == CCSToken::TNUM && t.str == "1")
     {
-        res = make_shared<CCSTerm>();
         lex.next();
+        return make_shared<CCSTerm>();
     }
     else if(t.type == CCSToken::TID)
     {
-        res = make_shared<CCSProcessName>(t.str);
-        lex.next();
+        string name = t.str;
+        vector<shared_ptr<CCSExp>> args;
+        t = lex.next();
+        if(t.type == CCSToken::TLSQBR)
+        {
+            lex.next();
+            args.push_back(parseExp());
+            t = lex.peek(0);
+            while(t.type == CCSToken::TCOMMA)
+            {
+                lex.next();
+                args.push_back(parseExp());
+                t = lex.peek(0);
+            }
+            if(t.type == CCSToken::TEOF)
+                throw CCSParserException(t, "unexpected end of file, expected `]`");
+            if(t.type != CCSToken::TRSQBR)
+                throw CCSParserException(t, "unexpected `" + t.str + "`, expected `]`");
+            lex.next();
+        }
+        return make_shared<CCSProcessName>(name, args);
     }
     else if(t.type == CCSToken::TLPAR)
     {
         lex.next();
-        res = parseProcess();
+        shared_ptr<CCSProcess> res = parseProcess();
         t = lex.peek(0);
         if(t.type == CCSToken::TEOF)
             throw CCSParserException(t, "unexpected end of file, expected `)`");
         if(t.type != CCSToken::TRPAR)
             throw CCSParserException(t, "unexpected `" + t.str + "`, expected `)`");
         lex.next();
+        return res;
     }
     else if(t.type == CCSToken::TEOF)
         throw CCSParserException(t, "unexpected end of file, expected `0`, `1`, identifier or `(`");
     else
         throw CCSParserException(t, "unexpected `" + t.str + "`, expected `0`, `1`, identifier or `(`");
-
-    while(!acts.empty())
-    {
-        res = make_shared<CCSPrefix>(acts.top(), res);
-        acts.pop();
-    }
-    return res;
 }
 
 CCSAction CCSParser::parseAction()
@@ -359,15 +624,29 @@ CCSAction CCSParser::parseAction()
     else if(t.str == "e")
         return CCSAction(CCSAction::Type::DELTA);
 
-    CCSAction::Type type = CCSAction::NONE;
     string name = t.str;
 
     t = lex.peek(0);
     switch(t.type)
     {
-    case CCSToken::TSEND: type = CCSAction::SEND; lex.next(); break;
-    case CCSToken::TRECV: type = CCSAction::RECV; lex.next(); break;
+    case CCSToken::TBANG:
+        t = lex.next();
+        if(t.type == CCSToken::TID || t.type == CCSToken::TNUM || t.type == CCSToken::TLPAR || t.type == CCSToken::TPLUS || t.type == CCSToken::TMINUS || t.type == CCSToken::TBANG)
+            return CCSAction(CCSAction::SEND, name, parseExp());
+        else
+            return CCSAction(CCSAction::SEND, name);
+    case CCSToken::TQUESTIONMARK:
+        t = lex.next();
+        if(t.type == CCSToken::TID)
+        {
+            lex.next();
+            return CCSAction(CCSAction::RECV, name, t.str);
+        }
+        else if(t.type == CCSToken::TNUM || t.type == CCSToken::TLPAR || t.type == CCSToken::TPLUS || t.type == CCSToken::TMINUS || t.type == CCSToken::TBANG)
+            return CCSAction(CCSAction::RECV, name, parseExp());
+        else
+            return CCSAction(CCSAction::RECV, name);
+    default:
+        return CCSAction(CCSAction::NONE, name);
     }
-
-    return CCSAction(type, name);
 }

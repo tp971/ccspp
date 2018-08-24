@@ -17,6 +17,7 @@ namespace ccspp
         virtual void visit(CCSParallel* p) = 0;
         virtual void visit(CCSRestrict* p) = 0;
         virtual void visit(CCSSequential* p) = 0;
+        virtual void visit(CCSWhen* p) = 0;
 
         void visit(CCSProcess& p);
         void visit(CCSProcess* p);
@@ -54,6 +55,9 @@ namespace ccspp
         virtual void visit(CCSSequential* p)
         { _visit(p, *v); }
 
+        virtual void visit(CCSWhen* p)
+        { _visit(p, *v); }
+
         virtual void _visit(CCSNull* p, V v) = 0;
         virtual void _visit(CCSTerm* p, V v) = 0;
         virtual void _visit(CCSProcessName* p, V v) = 0;
@@ -62,6 +66,7 @@ namespace ccspp
         virtual void _visit(CCSParallel* p, V v) = 0;
         virtual void _visit(CCSRestrict* p, V v) = 0;
         virtual void _visit(CCSSequential* p, V v) = 0;
+        virtual void _visit(CCSWhen* p, V v) = 0;
 
         void vvisit(CCSProcess& p, V v)
         { this->v = &v; p.accept(this); }
@@ -104,6 +109,9 @@ namespace ccspp
         virtual void visit(CCSSequential* p)
         { ret = _visit(p); }
 
+        virtual void visit(CCSWhen* p)
+        { ret = _visit(p); }
+
         virtual T _visit(CCSNull* p) = 0;
         virtual T _visit(CCSTerm* p) = 0;
         virtual T _visit(CCSProcessName* p) = 0;
@@ -112,6 +120,7 @@ namespace ccspp
         virtual T _visit(CCSParallel* p) = 0;
         virtual T _visit(CCSRestrict* p) = 0;
         virtual T _visit(CCSSequential* p) = 0;
+        virtual T _visit(CCSWhen* p) = 0;
 
         T vvisit(CCSProcess& p)
         { p.accept(this); return ret; }
@@ -155,6 +164,9 @@ namespace ccspp
         virtual void visit(CCSSequential* p)
         { ret = _visit(p, *v); }
 
+        virtual void visit(CCSWhen* p)
+        { ret = _visit(p, *v); }
+
         virtual T _visit(CCSNull* p, V v) = 0;
         virtual T _visit(CCSTerm* p, V v) = 0;
         virtual T _visit(CCSProcessName* p, V v) = 0;
@@ -163,6 +175,7 @@ namespace ccspp
         virtual T _visit(CCSParallel* p, V v) = 0;
         virtual T _visit(CCSRestrict* p, V v) = 0;
         virtual T _visit(CCSSequential* p, V v) = 0;
+        virtual T _visit(CCSWhen* p, V v) = 0;
 
         T vvisit(CCSProcess& p, V v)
         { this->v = &v; p.accept(this); return ret; }

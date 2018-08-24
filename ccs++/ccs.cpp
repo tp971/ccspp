@@ -9,11 +9,37 @@ CCSAction::CCSAction(Type type, string name)
     :type(type), name(name)
 {}
 
+CCSAction::CCSAction(Type type, std::string name, std::string input)
+    :type(type), name(name), input(input)
+{
+    if(type != RECV)
+        throw CCSException("invalid action type with input");
+}
+
+CCSAction::CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> exp)
+    :type(type), name(name), exp(exp)
+{
+    if(type != SEND && type != RECV)
+        throw CCSException("invalid action type with expression");
+}
+
 string CCSAction::getName() const
 { return name; }
 
 CCSAction::Type CCSAction::getType() const
 { return type; }
+
+string CCSAction::getInput() const
+{ return input; }
+
+shared_ptr<CCSExp> CCSAction::getExp() const
+{ return exp; }
+
+CCSAction CCSAction::getPlain() const
+{ return CCSAction(type, name); }
+
+CCSAction CCSAction::getNone() const
+{ return CCSAction(NONE, name); }
 
 void CCSAction::print(ostream& out) const
 {
@@ -27,9 +53,15 @@ void CCSAction::print(ostream& out) const
         break;
     case SEND:
         out << name << "!";
+        if(exp != nullptr)
+            exp->print(out);
         break;
     case RECV:
         out << name << "?";
+        if(input != "")
+            out << input;
+        if(exp != nullptr)
+            exp->print(out);
         break;
     case NONE:
         out << name;
@@ -70,8 +102,18 @@ int CCSAction::compare(const CCSAction& act) const
         return -1;
     else if(name > act.name)
         return 1;
-    else
+    else if(input < act.input)
+        return -1;
+    else if(input > act.input)
+        return 1;
+    else if(exp == act.exp)
         return 0;
+    else if(exp == nullptr)
+        return -1;
+    else if(act.exp == nullptr)
+        return 1;
+    else
+        return exp->compare(*act.exp);
 }
 
 bool CCSAction::operator< (const CCSAction& act) const
@@ -79,7 +121,8 @@ bool CCSAction::operator< (const CCSAction& act) const
 
 bool CCSAction::operator== (const CCSAction& act) const
 {
-    return type == act.type && name == act.name;
+    return type == act.type && name == act.name && input == act.input &&
+        (exp == act.exp || (exp != nullptr && act.exp != nullptr && exp->compare(*act.exp) == 0));
 }
 
 
@@ -134,19 +177,36 @@ bool CCSTransition::operator< (const CCSTransition& t) const
 CCSBinding::CCSBinding()
 {}
 
-CCSBinding::CCSBinding(string name, shared_ptr<CCSProcess> process)
-    :name(name), process(process)
+CCSBinding::CCSBinding(string name, vector<string> params, shared_ptr<CCSProcess> process)
+    :name(name), params(params), process(process)
 {}
 
 string CCSBinding::getName() const
 { return name; }
+
+vector<string> CCSBinding::getParams() const
+{ return params; }
 
 shared_ptr<CCSProcess> CCSBinding::getProcess() const
 { return process; }
 
 void CCSBinding::print(ostream& out) const
 {
-    out << name << " := ";
+    out << name;
+    if(params.size())
+    {
+        out << "[";
+        bool first = true;
+        for(const string& next : params)
+        {
+            if(!first)
+                out << ", ";
+            first = false;
+            out << next;
+        }
+        out << "]";
+    }
+    out << " := ";
     process->print(out);
     out << endl;
 }
@@ -159,16 +219,25 @@ std::ostream& ccspp::operator<< (std::ostream& out, const CCSBinding& b)
 
 
 
-void CCSProgram::addBinding(string name, shared_ptr<CCSProcess> process)
-{ bindings[name] = CCSBinding(name, process); }
+void CCSProgram::addBinding(string name, vector<string> params, shared_ptr<CCSProcess> process)
+{ bindings[name] = CCSBinding(name, params, process); }
 
 void CCSProgram::setProcess(shared_ptr<CCSProcess> process)
 { this->process = process; }
 
-shared_ptr<CCSProcess> CCSProgram::get(string name) const
+shared_ptr<CCSProcess> CCSProgram::get(string name, vector<int> args, bool fold) const
 {
     if(bindings.count(name))
-        return bindings.at(name).getProcess();
+    {
+        const CCSBinding& b = bindings.at(name);
+        vector<string> params = b.getParams();
+        if(args.size() != params.size())
+            return nullptr;
+        shared_ptr<CCSProcess> res = bindings.at(name).getProcess();
+        for(int i = params.size() - 1; i >= 0; i--)
+            res = res->subst(params[i], args[i], fold);
+        return res;
+    }
     else
         return nullptr;
 }
@@ -201,16 +270,51 @@ std::ostream& ccspp::operator<< (std::ostream& out, const CCSProgram& p)
 
 
 
-CCSException::CCSException(shared_ptr<CCSProcess> process, string message)
-    :runtime_error(message), process(process)
+CCSException::CCSException(std::string message)
+    :runtime_error(message)
 {}
 
-shared_ptr<CCSProcess> CCSException::getProcess() const
+
+
+CCSProcessException::CCSProcessException(shared_ptr<CCSProcess> process, string message)
+    :CCSException(message), process(process)
+{}
+
+shared_ptr<CCSProcess> CCSProcessException::getProcess() const
 { return process; }
 
+
+
 CCSRecursionException::CCSRecursionException(shared_ptr<CCSProcessName> process, string message)
-    :CCSException(process, message), name(process->getName())
+    :CCSProcessException(process, message), name(process->getName())
 {}
 
 string CCSRecursionException::getName() const
 { return name; }
+
+
+
+CCSExpException::CCSExpException(shared_ptr<CCSExp> exp, string message)
+    :CCSException(message), exp(exp)
+{}
+
+shared_ptr<CCSExp> CCSExpException::getExp() const
+{ return exp; }
+
+void CCSExpException::setExp(shared_ptr<CCSExp> exp)
+{ this->exp = exp; }
+
+
+
+CCSUnboundException::CCSUnboundException(shared_ptr<CCSExp> exp, string id, string message)
+    :CCSExpException(exp, message), id(id)
+{}
+
+string CCSUnboundException::getId() const
+{ return id; }
+
+
+
+CCSUndefinedException::CCSUndefinedException(shared_ptr<CCSExp> exp, string message)
+    :CCSExpException(exp, message)
+{}

@@ -21,11 +21,11 @@ int cmd_random(CCSProgram& program)
         set<CCSTransition> trans;
         try
         {
-            trans = p->getTransitions(program);
+            trans = p->getTransitions(program, !opt_no_fold);
         }
-        catch(CCSRecursionException& ex)
+        catch(CCSException& ex)
         {
-            if(opt_ignore_unguarded)
+            if(opt_ignore_error)
                 cerr << "warning: " << ex.what() << endl;
             else
             {
