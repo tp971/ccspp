@@ -29,8 +29,8 @@ int cmd_graph(CCSProgram& program)
     cout << "digraph lts {" << endl;
 
     int nodes_id = 0;
-    map<shared_ptr<CCSProcess>, int, PtrCmp> nodes;
-    set<shared_ptr<CCSProcess>, PtrCmp> frontier;
+    map<shared_ptr<CCSProcess>, int, PtrCmp<CCSProcess>> nodes;
+    set<shared_ptr<CCSProcess>, PtrCmp<CCSProcess>> frontier;
     
     shared_ptr<CCSProcess> start = program.getProcess();
     nodes[start] = nodes_id++;
@@ -41,7 +41,7 @@ int cmd_graph(CCSProgram& program)
     int depth = 0;
     while((opt_max_depth < 0 || depth < opt_max_depth) && !frontier.empty())
     {
-        set<shared_ptr<CCSProcess>, PtrCmp> frontier2;
+        set<shared_ptr<CCSProcess>, PtrCmp<CCSProcess>> frontier2;
         for(shared_ptr<CCSProcess> p : frontier)
         {
             int id = nodes[p];

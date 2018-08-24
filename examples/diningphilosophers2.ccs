@@ -1,7 +1,7 @@
-Fork1 := get1?.put1?.Fork1
-Fork2 := get2?.put2?.Fork2
+Fork1 := (get1?.put1?.Fork1)
+Fork2 := (get2?.put2?.Fork2)
 
-Phil1 := think!.get1!.get2!.eat!.put1!.put2!.Phil1
-Phil2 := think!.get2!.get1!.eat!.put2!.put1!.Phil2
+Phil1 := (think!.get1!.get2!.eat!.put1!.put2!.Phil1)
+Phil2 := (think!.get2!.get1!.eat!.put2!.put1!.Phil2)
 
 (Fork1 | Phil1 | Fork2 | Phil2)\{*,eat,think}

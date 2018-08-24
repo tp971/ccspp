@@ -503,6 +503,4 @@ One execution of this process would now be:
 
 ## CCS value passing
 
-_Note: This is not yet implemented._
-
 _Note: This is not yet documented._

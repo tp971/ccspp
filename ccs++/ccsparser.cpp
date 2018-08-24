@@ -481,7 +481,7 @@ shared_ptr<CCSProcess> CCSParser::parseProcess(int prec, shared_ptr<CCSProcess> 
             shared_ptr<CCSExp> cond = parseExp();
             res = make_shared<CCSWhen>(cond, parseProcess(pprec_i));
         }
-        else if(t.type == CCSToken::TID && (t2.type == CCSToken::TDOT || t2.type == CCSToken::TQUESTIONMARK || t2.type == CCSToken::TBANG))
+        else if(t.type == CCSToken::TID && (t2.type == CCSToken::TLPAR || t2.type == CCSToken::TQUESTIONMARK || t2.type == CCSToken::TBANG || t2.type == CCSToken::TDOT))
         {
             CCSAction act = parseAction();
             t = lex.peek(0);
@@ -617,36 +617,42 @@ CCSAction CCSParser::parseAction()
         throw CCSParserException(t, "unexpected end of file, expected identifier");
     if(t.type != CCSToken::TID)
         throw CCSParserException(t, "unexpected `" + t.str + "`, expected identifier");
-    lex.next();
 
+    lex.next();
     if(t.str == "i")
         return CCSAction(CCSAction::Type::TAU);
     else if(t.str == "e")
         return CCSAction(CCSAction::Type::DELTA);
-
     string name = t.str;
 
+    shared_ptr<CCSExp> param;
     t = lex.peek(0);
+    if(t.type == CCSToken::TLPAR)
+    {
+        param = parseExp();
+        t = lex.peek(0);
+    }
+
     switch(t.type)
     {
     case CCSToken::TBANG:
         t = lex.next();
         if(t.type == CCSToken::TID || t.type == CCSToken::TNUM || t.type == CCSToken::TLPAR || t.type == CCSToken::TPLUS || t.type == CCSToken::TMINUS || t.type == CCSToken::TBANG)
-            return CCSAction(CCSAction::SEND, name, parseExp());
+            return CCSAction(CCSAction::SEND, name, param, parseExp());
         else
-            return CCSAction(CCSAction::SEND, name);
+            return CCSAction(CCSAction::SEND, name, param);
     case CCSToken::TQUESTIONMARK:
         t = lex.next();
         if(t.type == CCSToken::TID)
         {
             lex.next();
-            return CCSAction(CCSAction::RECV, name, t.str);
+            return CCSAction(CCSAction::RECV, name, param, t.str);
         }
         else if(t.type == CCSToken::TNUM || t.type == CCSToken::TLPAR || t.type == CCSToken::TPLUS || t.type == CCSToken::TMINUS || t.type == CCSToken::TBANG)
-            return CCSAction(CCSAction::RECV, name, parseExp());
+            return CCSAction(CCSAction::RECV, name, param, parseExp());
         else
-            return CCSAction(CCSAction::RECV, name);
+            return CCSAction(CCSAction::RECV, name, param);
     default:
-        return CCSAction(CCSAction::NONE, name);
+        return CCSAction(CCSAction::NONE, name, param);
     }
 }

@@ -16,6 +16,8 @@ namespace ccspp
     template<typename T, typename V = void>
     class CCSVisitor;
 
+    //TODO: parameterized action (act(id)!...)
+
     /** @brief Represents a CCS action. */
     class CCSAction
     {
@@ -23,28 +25,34 @@ namespace ccspp
         /** @brief Represents the type of a CCS action */
         enum Type
         {
-            TAU = 0,    /**< internal action */
+            NONE = 0,   /**< action */
+            TAU,        /**< internal action */
             DELTA,      /**< termination action */
             SEND,       /**< send action */
-            RECV,       /**< receive action */
-            NONE        /**< action */
+            RECV        /**< receive action */
         };
 
     private:
         Type type;
         std::string name;
+        std::shared_ptr<CCSExp> param;
         std::string input;
         std::shared_ptr<CCSExp> exp;
 
+        CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> param, std::string input, std::shared_ptr<CCSExp> exp);
+
     public:
-        /** @brief Constructs a CCSAction */
-        CCSAction(Type type = NONE, std::string name = "");
+        /** @brief Constructs a CCSAction i, e or none. */
+        CCSAction(Type type = NONE);
 
-        /** @brief Constructs a CCSAction name?input */
-        CCSAction(Type type, std::string name, std::string input);
+        /** @brief Constructs a CCSAction name(param) */
+        CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> param = nullptr);
 
-        /** @brief Constructs a CCSAction name?exp or name!exp */
-        CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> exp);
+        /** @brief Constructs a CCSAction name(param)?input */
+        CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> param, std::string input);
+
+        /** @brief Constructs a CCSAction name(param)?exp or name(param)!exp */
+        CCSAction(Type type, std::string name, std::shared_ptr<CCSExp> param, std::shared_ptr<CCSExp> exp);
 
         /** @brief Returns the type of the CCSAction. */
         Type getType() const;
@@ -52,17 +60,29 @@ namespace ccspp
         /** @brief Returns the name of the CCSAction. */
         std::string getName() const;
 
+        /** @brief Returns the parameter expression in act(param) */
+        std::shared_ptr<CCSExp> getParam() const;
+
         /** @brief Returns the input in act?input */
         std::string getInput() const;
 
         /** @brief Returns the expression in act?exp or act!exp */
         std::shared_ptr<CCSExp> getExp() const;
 
-        /** @brief Returns the action without any expression or input. */
+        /** @brief Returns the action without expression or input. */
+        CCSAction getBase() const;
+
+        /** @brief Returns the action without parameter and expression or input. */
         CCSAction getPlain() const;
 
-        /** @brief Returns the action without any expression or input and type. */
+        /** @brief Returns the action without type, parameter and expression or input. */
         CCSAction getNone() const;
+
+        /** @brief Substitutes variable to constant in expressions. */
+        CCSAction subst(std::string id, int v, bool fold = true) const;
+
+        /** @brief Returns the action with evaluated expressions. */
+        CCSAction eval() const;
 
         /** @brief Prints the CCSAction to an output stream. */
         void print(std::ostream& out) const;
@@ -197,6 +217,17 @@ namespace ccspp
 
     /** @brief Prints a CCSProgram to an output stream */
     std::ostream& operator<< (std::ostream& out, const CCSProgram& p);
+
+    /** @brief Comparator functor to use CCS object pointers in STL containers. */
+    template<typename T>
+    class PtrCmp
+    {
+    public:
+        bool operator() (const std::shared_ptr<T>& p1, const std::shared_ptr<T>& p2) const
+        {
+            return *p1 < *p2;
+        }
+    };
 
     class CCSException : public std::runtime_error
     {

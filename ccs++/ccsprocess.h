@@ -88,13 +88,6 @@ namespace ccspp
     /** @brief Prints a CCSProcess to an output stream */
     std::ostream& operator<< (std::ostream& out, const CCSProcess& p);
 
-    /** @brief Comparator functor to use CCSProcess pointers in STL containers. */
-    class PtrCmp
-    {
-    public:
-        bool operator() (const std::shared_ptr<CCSProcess>& p1, const std::shared_ptr<CCSProcess>& p2) const;
-    };
-
     class CCSNull : public CCSProcess, public std::enable_shared_from_this<CCSNull>
     {
     protected:

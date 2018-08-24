@@ -50,13 +50,6 @@ ostream& ccspp::operator<< (ostream& out, const CCSProcess& p)
 
 
 
-bool PtrCmp::operator() (const shared_ptr<CCSProcess>& p1, const shared_ptr<CCSProcess>& p2) const
-{
-    return *p1 < *p2;
-}
-
-
-
 CCSNull::CCSNull()
     :CCSProcess(CCSNULL)
 {}
@@ -172,7 +165,6 @@ set<CCSTransition> CCSProcessName::getTransitions(CCSProgram& program, bool fold
 
 shared_ptr<CCSProcess> CCSProcessName::subst(string id, int val, bool fold)
 {
-    bool changed = false;
     vector<shared_ptr<CCSExp>> args2;
     for(const shared_ptr<CCSExp>& next : args)
         args2.push_back(next->subst(id, val, fold));
@@ -226,37 +218,19 @@ int CCSPrefix::compare(CCSProcess* p2) const
 
 set<CCSTransition> CCSPrefix::getTransitions(CCSProgram& program, bool fold, set<string> seen)
 {
-    shared_ptr<CCSExp> exp = act.getExp();
-    if(exp != nullptr && exp->getType() != CCSExp::CONST)
-    {
-        CCSAction act2(act.getType(), act.getName(), make_shared<CCSConstExp>(exp->eval()));
-        return { CCSTransition(act2, shared_from_this(), p) };
-    }
-    else
-        return { CCSTransition(act, shared_from_this(), p) };
+    return { CCSTransition(act.eval(), shared_from_this(), p) };
 }
 
 shared_ptr<CCSProcess> CCSPrefix::subst(string id, int val, bool fold)
 {
     if(act.getInput() == id)
         return shared_from_this();
-    if(act.getExp() != nullptr)
-    {
-        CCSAction act2(act.getType(), act.getName(), act.getExp()->subst(id, val, fold));
-        shared_ptr<CCSProcess> p2 = p->subst(id, val, fold);
-        if(act2 == act && p2 == p)
-            return shared_from_this();
-        else
-            return make_shared<CCSPrefix>(act2, p2);
-    }
+    CCSAction act2 = act.subst(id, val, fold);
+    shared_ptr<CCSProcess> p2 = p->subst(id, val, fold);
+    if(act2 == act && p2 == p)
+        return shared_from_this();
     else
-    {
-        shared_ptr<CCSProcess> p2 = p->subst(id, val, fold);
-        if(p2 == p)
-            return shared_from_this();
-        else
-            return make_shared<CCSPrefix>(act, p2);
-    }
+        return make_shared<CCSPrefix>(act2, p2);
 }
 
 void CCSPrefix::print(ostream& out) const
@@ -373,20 +347,46 @@ set<CCSTransition> CCSParallel::getTransitions(CCSProgram& program, bool fold, s
         for(const CCSTransition& t2 : resr)
         {
             CCSAction act2 = t2.getAction();
-            if(!(act.getPlain() == ~act2.getPlain()))
+            if(!(act.getBase() == ~act2.getBase()))
                 continue;
-            CCSAction* send = act.getType() == CCSAction::SEND ? &act : &act2;
-            CCSAction* recv = act.getType() == CCSAction::RECV ? &act : &act2;
+
+            CCSAction* send = &act;
+            shared_ptr<CCSProcess> send_to = t.getTo();
+            CCSAction* recv = &act2;
+            shared_ptr<CCSProcess> recv_to = t2.getTo();
+
+            bool swap = false;
+            if(act.getType() == CCSAction::RECV)
+            {
+                swap = true;
+                CCSAction* tmp = send;
+                send = recv;
+                recv = tmp;
+                send_to.swap(recv_to);
+            }
+
             if(send->getExp() == nullptr && recv->getInput() == "" && recv->getExp() == nullptr)
-                res.emplace(CCSAction(CCSAction::TAU), shared_from_this(),
-                    make_shared<CCSParallel>(t.getTo(), t2.getTo()));
+                ;//do nothing
             else if(send->getExp() != nullptr && recv->getInput() != "")
-                res.emplace(CCSAction(CCSAction::TAU), shared_from_this(),
-                    make_shared<CCSParallel>(t.getTo(), t2.getTo()->subst(recv->getInput(), send->getExp()->eval(), fold)));
+                recv_to = recv_to->subst(recv->getInput(), send->getExp()->eval());
             else if(send->getExp() != nullptr && recv->getExp() != nullptr)
-                if(send->getExp()->eval() == recv->getExp()->eval())
-                    res.emplace(CCSAction(CCSAction::TAU), shared_from_this(),
-                        make_shared<CCSParallel>(t.getTo(), t2.getTo()));
+            {
+                if(send->getExp()->eval() != recv->getExp()->eval())
+                    continue;
+            }
+            else
+                continue;
+
+            if(swap)
+            {
+                CCSAction* tmp = send;
+                send = recv;
+                recv = tmp;
+                send_to.swap(recv_to);
+            }
+
+            res.emplace(CCSAction(CCSAction::TAU), shared_from_this(),
+                make_shared<CCSParallel>(send_to, recv_to));
         }
     }
 

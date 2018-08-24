@@ -7,7 +7,7 @@ using namespace std;
 using namespace ccspp;
 
 bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<vector<CCSAction>>& seen,
-               set<shared_ptr<CCSProcess>, PtrCmp>& visited, deque<CCSTransition>& trace)
+               set<shared_ptr<CCSProcess>, PtrCmp<CCSProcess>>& visited, deque<CCSTransition>& trace)
 {
     if(depth <= 0)
         return false;
@@ -80,7 +80,7 @@ bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<vec
 
 bool dfs_limit(CCSProgram& program, shared_ptr<CCSProcess> p, int depth, set<vector<CCSAction>>& seen)
 {
-    set<shared_ptr<CCSProcess>, PtrCmp> visited;
+    set<shared_ptr<CCSProcess>, PtrCmp<CCSProcess>> visited;
     deque<CCSTransition> trace;
     return dfs_limit(program, p, depth, seen, visited, trace);
 }
