@@ -550,7 +550,7 @@ shared_ptr<CCSProcess> CCSSequential::subst(string id, int val, bool fold)
     if(left2 == left && right2 == right)
         return shared_from_this();
     else
-        return make_shared<CCSParallel>(left2, right2);
+        return make_shared<CCSSequential>(left2, right2);
 }
 
 void CCSSequential::print(ostream& out) const
