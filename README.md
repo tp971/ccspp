@@ -132,13 +132,13 @@ Semantics
 
 ### Actions
 There are five kinds of actions:
-1. Internal action "i".
-2. Termination acion "e".
-3. Sending action "identifier!"
-4. Receiving action "identifier?"
-5. "Normal" action "identifier"
+1. `i` (the internal action)
+2. `e` (the termination action)
+3. `identifier` (an action)
+4. `identifier!` (a send action)
+5. `identifier?` (a receive action)
 
-Let act be an action. We define the complementary action ~act of act as follows:
+We define the complementary action ~act of act as follows:
 
 1. ~act? := act!
 2. ~act! := act?
