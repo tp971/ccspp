@@ -68,14 +68,57 @@ void CCSLexer::read()
 
     switch(ch)
     {
-    case '(': tokens.emplace_back(CCSToken::TLPAR, "(", name, line, col); getch(); break;
+    case '(':
+        getch();
+        if(ch == '*')
+        {
+            getch();
+            int last = 0;
+            while(!input.eof() && !(last == '*' && ch == ')'))
+            {
+                last = ch;
+                getch();
+            }
+            getch();
+            read();
+            return;
+        }
+        else
+            tokens.emplace_back(CCSToken::TLPAR, "(", name, line, col);
+        break;
     case ')': tokens.emplace_back(CCSToken::TRPAR, ")", name, line, col); getch(); break;
     case '[': tokens.emplace_back(CCSToken::TLSQBR, "[", name, line, col); getch(); break;
     case ']': tokens.emplace_back(CCSToken::TRSQBR, "]", name, line, col); getch(); break;
     case '+': tokens.emplace_back(CCSToken::TPLUS, "+", name, line, col); getch(); break;
     case '-': tokens.emplace_back(CCSToken::TMINUS, "-", name, line, col); getch(); break;
     case '*': tokens.emplace_back(CCSToken::TSTAR, "*", name, line, col); getch(); break;
-    case '/': tokens.emplace_back(CCSToken::TSLASH, "/", name, line, col); getch(); break;
+    case '/':
+        getch();
+        if(ch == '/')
+        {
+            getch();
+            while(!input.eof() && ch != '\r' && ch != '\n')
+                getch();
+            getch();
+            read();
+            return;
+        }
+        else if(ch == '*')
+        {
+            getch();
+            int last = 0;
+            while(!input.eof() && !(last == '*' && ch == '/'))
+            {
+                last = ch;
+                getch();
+            }
+            getch();
+            read();
+            return;
+        }
+        else
+            tokens.emplace_back(CCSToken::TSLASH, "/", name, line, col);
+        break;
     case '%': tokens.emplace_back(CCSToken::TPERCENT, "%", name, line, col); getch(); break;
     case '&':
         getch();
@@ -495,6 +538,9 @@ shared_ptr<CCSProcess> CCSParser::parseProcess(int prec, shared_ptr<CCSProcess> 
         else
             res = parsePrimaryProcess();
     }
+
+    if(prec == pprec_i)
+        return res;
 
     CCSToken t = lex.peek(0);
     while(t.type == CCSToken::TBACKSLASH)

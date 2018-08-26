@@ -489,7 +489,7 @@ void CCSRestrict::print(ostream& out) const
 {
     out << "(";
     p->print(out);
-    out << ")\\{";
+    out << "\\{";
     bool first = true;
     if(complement)
     {
@@ -503,7 +503,7 @@ void CCSRestrict::print(ostream& out) const
         first = false;
         act.print(out);
     }
-    out << "}";
+    out << "})";
 }
 
 void CCSRestrict::accept(CCSVisitor<void>* v)
