@@ -255,27 +255,27 @@ CCSParser::CCSParser(istream& input, string name)
 {
     prec_i = 0;
 
-    addPrec(1);
+    addPrec(-1);
     addOp(CCSToken::TPIPEPIPE);
 
-    addPrec(1);
+    addPrec(-1);
     addOp(CCSToken::TANDAND);
 
-    addPrec(1);
+    addPrec(-1);
     addOp(CCSToken::TEQEQ);
     addOp(CCSToken::TNEQ);
 
-    addPrec(1);
+    addPrec(-1);
     addOp(CCSToken::TLT);
     addOp(CCSToken::TLEQ);
     addOp(CCSToken::TGT);
     addOp(CCSToken::TGEQ);
 
-    addPrec(1);
+    addPrec(-1);
     addOp(CCSToken::TPLUS);
     addOp(CCSToken::TMINUS);
 
-    addPrec(1);
+    addPrec(-1);
     addOp(CCSToken::TSTAR);
     addOp(CCSToken::TSLASH);
     addOp(CCSToken::TPERCENT);
@@ -287,13 +287,13 @@ CCSParser::CCSParser(istream& input, string name)
 
     pprec_i = 0;
 
-    addPPrec(1);
+    addPPrec(-1);
     addPOp(CCSToken::TSEMICOLON);
 
-    addPPrec(1);
+    addPPrec(-1);
     addPOp(CCSToken::TPIPE);
 
-    addPPrec(1);
+    addPPrec(-1);
     addPOp(CCSToken::TPLUS);
 
     //unary
