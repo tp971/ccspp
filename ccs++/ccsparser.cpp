@@ -436,9 +436,9 @@ shared_ptr<CCSExp> CCSParser::parseExp(int prec)
     CCSToken t = lex.peek(0);
     switch(t.type)
     {
-    case CCSToken::TPLUS: res = make_shared<CCSUnaryExp>(CCSUnaryExp::PLUS, parseExp(prec_i)); break;
-    case CCSToken::TMINUS: res = make_shared<CCSUnaryExp>(CCSUnaryExp::MINUS, parseExp(prec_i)); break;
-    case CCSToken::TBANG: res = make_shared<CCSUnaryExp>(CCSUnaryExp::NOT, parseExp(prec_i)); break;
+    case CCSToken::TPLUS: lex.next(); res = make_shared<CCSUnaryExp>(CCSUnaryExp::PLUS, parseExp(prec_i)); break;
+    case CCSToken::TMINUS: lex.next(); res = make_shared<CCSUnaryExp>(CCSUnaryExp::MINUS, parseExp(prec_i)); break;
+    case CCSToken::TBANG: lex.next(); res = make_shared<CCSUnaryExp>(CCSUnaryExp::NOT, parseExp(prec_i)); break;
     default: res = parsePrimaryExp(); break;
     }
 
