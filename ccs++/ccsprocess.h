@@ -44,7 +44,7 @@ namespace ccspp
         /** @brief Internal comparison function.
             This should only be called if p is of the same type as this CCSProcess.
         */
-        virtual int compare(CCSProcess* p) const = 0;
+        virtual int compare(const CCSProcess* p) const = 0;
 
         /** @brief Internal method to calculates all possible transition of that process. */
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen) = 0;
@@ -52,6 +52,9 @@ namespace ccspp
     public:
         /** @brief Constructor. */
         CCSProcess(Type type);
+
+        /** @brief Destructor. */
+        virtual ~CCSProcess() = default;
 
         /** @brief Returns the type of the process. */
         Type getType() const;
@@ -80,10 +83,10 @@ namespace ccspp
         /** @brief Compares this CCSProcess to another instance.
             \returns -1 if this < p, 1 if this > p, 0 else.
         */
-        int compare(CCSProcess& p) const;
+        int compare(const CCSProcess& p) const;
 
         /** @brief Comparator to use in STL containers. */
-        bool operator< (CCSProcess& p) const;
+        bool operator< (const CCSProcess& p) const;
     };
 
     /** @brief Prints a CCSProcess to an output stream */
@@ -93,7 +96,7 @@ namespace ccspp
     class CCSNull : public CCSProcess, public std::enable_shared_from_this<CCSNull>
     {
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -107,7 +110,7 @@ namespace ccspp
     class CCSTerm : public CCSProcess, public std::enable_shared_from_this<CCSTerm>
     {
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -125,7 +128,7 @@ namespace ccspp
         std::vector<std::shared_ptr<CCSExp>> args;
 
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -146,7 +149,7 @@ namespace ccspp
         std::shared_ptr<CCSProcess> p;
 
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -167,7 +170,7 @@ namespace ccspp
         std::shared_ptr<CCSProcess> right;
 
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -188,7 +191,7 @@ namespace ccspp
         std::shared_ptr<CCSProcess> right;
 
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -210,7 +213,7 @@ namespace ccspp
         bool complement;
 
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -232,7 +235,7 @@ namespace ccspp
         std::shared_ptr<CCSProcess> right;
 
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:
@@ -253,7 +256,7 @@ namespace ccspp
         std::shared_ptr<CCSProcess> p;
 
     protected:
-        virtual int compare(CCSProcess* p) const;
+        virtual int compare(const CCSProcess* p) const;
         virtual std::set<CCSTransition> getTransitions(CCSProgram& program, bool fold, std::set<std::string> seen);
 
     public:

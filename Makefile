@@ -24,8 +24,8 @@ makedirs: $(ObjDir)/ $(BinDir)/
 	mkdir -p $@
 
 makelibs:
-	if [ -f dep/cli++/Makefile ]; then make -C dep/cli++; fi
-	make -C ccs++
+	if [ -f dep/cli++/Makefile ]; then $(MAKE) -C dep/cli++; fi
+	$(MAKE) -C ccs++
 
 $(BinDir)/$(Output): $(Objects) ccs++/lib/libccs++.a
 	$(CXX) -o $(BinDir)/$(Output) $(Objects) $(LDflags)
@@ -40,17 +40,17 @@ obj/%.cpp.o: %.cpp
 
 .IGNORE: clean
 clean:
-	make -C ccs++ clean
+	$(MAKE) -C ccs++ clean
 	rm $(ObjDir)/*
 	rm $(BinDir)/$(Output)
 
 .PHONY: install
 install: $(BinDir)/$(Output)
-	make -C ccs++ install
+	$(MAKE) -C ccs++ install
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp $< $(DESTDIR)$(PREFIX)/bin/$(Output)
 
 .PHONY: uninstall
 uninstall:
-	make -C ccs++ uninstall
+	$(MAKE) -C ccs++ uninstall
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(Output)

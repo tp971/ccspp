@@ -40,6 +40,9 @@ namespace ccspp
         /** @brief Constructor. */
         CCSExp(Type type);
 
+        /** @brief Destructor. */
+        virtual ~CCSExp() = default;
+
         /** @brief Returns the type of the expression. */
         Type getType() const;
 

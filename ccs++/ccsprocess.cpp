@@ -22,7 +22,7 @@ set<CCSTransition> CCSProcess::getTransitions(CCSProgram& program, bool fold)
     return move(res);
 }
 
-int CCSProcess::compare(CCSProcess& p) const
+int CCSProcess::compare(const CCSProcess& p) const
 {
     if(type < p.type)
         return -1;
@@ -32,7 +32,7 @@ int CCSProcess::compare(CCSProcess& p) const
         return compare(&p);
 }
 
-bool CCSProcess::operator< (CCSProcess& p) const
+bool CCSProcess::operator< (const CCSProcess& p) const
 { return compare(p) < 0; }
 
 CCSProcess::operator string() const
@@ -54,7 +54,7 @@ CCSNull::CCSNull()
     :CCSProcess(CCSNULL)
 {}
 
-int CCSNull::compare(CCSProcess* p2) const
+int CCSNull::compare(const CCSProcess* p2) const
 {
     return 0;
 }
@@ -83,7 +83,7 @@ CCSTerm::CCSTerm()
     :CCSProcess(TERM)
 {}
 
-int CCSTerm::compare(CCSProcess* p2) const
+int CCSTerm::compare(const CCSProcess* p2) const
 {
     return 0;
 }
@@ -118,7 +118,7 @@ string CCSProcessName::getName() const
 vector<shared_ptr<CCSExp>> CCSProcessName::getArgs()
 { return args; }
 
-int CCSProcessName::compare(CCSProcess* p2) const
+int CCSProcessName::compare(const CCSProcess* p2) const
 {
     CCSProcessName* _p2 = (CCSProcessName*)p2;
     if(name < _p2->name)
@@ -207,7 +207,7 @@ CCSAction CCSPrefix::getAction() const
 shared_ptr<CCSProcess> CCSPrefix::getProcess() const
 { return p; }
 
-int CCSPrefix::compare(CCSProcess* p2) const
+int CCSPrefix::compare(const CCSProcess* p2) const
 {
     CCSPrefix* _p2 = (CCSPrefix*)p2;
     int c = act.compare(_p2->act);
@@ -255,7 +255,7 @@ shared_ptr<CCSProcess> CCSChoice::getLeft() const
 shared_ptr<CCSProcess> CCSChoice::getRight() const
 { return right; }
 
-int CCSChoice::compare(CCSProcess* p2) const
+int CCSChoice::compare(const CCSProcess* p2) const
 {
     CCSChoice* _p2 = (CCSChoice*)p2;
     int c = left->compare(*_p2->left);
@@ -308,7 +308,7 @@ shared_ptr<CCSProcess> CCSParallel::getLeft() const
 shared_ptr<CCSProcess> CCSParallel::getRight() const
 { return right; }
 
-int CCSParallel::compare(CCSProcess* p2) const
+int CCSParallel::compare(const CCSProcess* p2) const
 {
     CCSParallel* _p2 = (CCSParallel*)p2;
     int c = left->compare(*_p2->left);
@@ -442,7 +442,7 @@ set<CCSAction> CCSRestrict::getR() const
 bool CCSRestrict::isComplement() const
 { return complement; }
 
-int CCSRestrict::compare(CCSProcess* p2) const
+int CCSRestrict::compare(const CCSProcess* p2) const
 {
     CCSRestrict* _p2 = (CCSRestrict*)p2;
     int c = p->compare(*_p2->p);
@@ -521,7 +521,7 @@ shared_ptr<CCSProcess> CCSSequential::getLeft() const
 shared_ptr<CCSProcess> CCSSequential::getRight() const
 { return right; }
 
-int CCSSequential::compare(CCSProcess* p2) const
+int CCSSequential::compare(const CCSProcess* p2) const
 {
     CCSSequential* _p2 = (CCSSequential*)p2;
     int c = left->compare(*_p2->left);
@@ -577,7 +577,7 @@ shared_ptr<CCSExp> CCSWhen::getCond() const
 shared_ptr<CCSProcess> CCSWhen::getProcess() const
 { return p; }
 
-int CCSWhen::compare(CCSProcess* p2) const
+int CCSWhen::compare(const CCSProcess* p2) const
 {
     CCSWhen* _p2 = (CCSWhen*)p2;
     int c = cond->compare(*_p2->cond);
