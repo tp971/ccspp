@@ -152,7 +152,7 @@ shared_ptr<CCSExp> CCSUnaryExp::subst(string id, int val, bool fold)
     if(exp2 == exp)
         return shared_from_this();
     else
-        return make_shared<CCSUnaryExp>(op, exp);
+        return make_shared<CCSUnaryExp>(op, exp2);
 }
 
 int CCSUnaryExp::eval(int val)
@@ -171,7 +171,7 @@ int CCSUnaryExp::eval()
     int val;
     try
     {
-        return val = exp->eval();
+        val = exp->eval();
     }
     catch(CCSExpException& e)
     {
@@ -253,7 +253,7 @@ int CCSBinaryExp::eval(int lval, int rval)
         if(rval == 0)
             throw CCSUndefinedException(shared_from_this(), "division by zero");
         return lval % rval;
-    case OR: return lval | rval;
+    case OR: return lval || rval;
     case AND: return lval && rval;
     case EQ: return lval == rval;
     case NEQ: return lval != rval;
